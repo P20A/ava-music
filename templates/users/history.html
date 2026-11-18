@@ -23,7 +23,7 @@
             {% else %}
               <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
             {% endif %}
-            <span class="cover-play" data-play data-song="{{ play.song.title }}" data-artist="{{ play.song.primary_artist.name }}" data-duration="{{ play.song.duration }}">▶</span>
+            <span class="cover-play" data-play data-song="{{ play.song.title }}" data-artist="{{ play.song.primary_artist.name }}" data-duration="{{ play.song.duration }}"{% if play.song.is_playable %} data-stream="{% url 'music:stream' slug=play.song.slug %}"{% endif %}>▶</span>
           </a>
           <div class="post-body">
             <div class="post-meta">

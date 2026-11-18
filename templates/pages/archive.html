@@ -22,7 +22,7 @@
     </div>
   </div>
   <div class="hero-stats">
-    <div class="hero-stat"><b>{{ songs.paginator.count|default:0 }}</b><small>آهنگ منتشرشده</small></div>
+    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>آهنگ منتشرشده</small></div>
     <div class="hero-stat"><b>{{ categories.count }}</b><small>دسته‌بندی</small></div>
     <div class="hero-stat"><b>{{ artists.count|default:0 }}</b><small>خواننده</small></div>
   </div>
@@ -66,7 +66,7 @@
             {% else %}
               <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
             {% endif %}
-            <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+            <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}"{% if song.is_playable %} data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}>▶</span>
           </a>
           <div class="song-card-body">
             <div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date_short }}</time></div>
@@ -89,7 +89,7 @@
             {% else %}
               <img src="{% static 'images/cover-1.svg' %}" alt="">
             {% endif %}
-            <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+            <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}"{% if song.is_playable %} data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}>▶</span>
           </a>
           <div class="post-body"><div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date }}</time><span>{{ song.view_count|fa_number }} بازدید</span></div><h3><a href="{{ song.get_absolute_url }}">{{ song.title }} — {{ song.primary_artist.name }}</a></h3><p>{{ song.short_description }}</p><div class="post-bottom"><span>خواننده: <b>{{ song.primary_artist.name }}</b></span><a href="{{ song.get_absolute_url }}" class="read-more">ادامه و دانلود <b>←</b></a></div></div>
         </article>
@@ -99,21 +99,23 @@
 
     <div class="empty-state" id="archiveEmpty"><b>نتیجه‌ای پیدا نشد</b>فیلتر دیگری را امتحان کنید یا همه آهنگ‌ها را ببینید.</div>
 
+    {% if paginator.num_pages > 1 %}
     <div class="pagination">
-      {% if songs.has_previous %}
-      <a href="?page={{ songs.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
       {% endif %}
-      {% for num in songs.paginator.page_range %}
-        {% if songs.number == num %}
-        <a class="page-active" href="#">{{ num }}</a>
-        {% elif num > songs.number|add:-3 and num < songs.number|add:3 %}
-        <a href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+      {% for num in paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a class="page-active" href="#">{{ num|fa_number }}</a>
+        {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+        <a href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num|fa_number }}</a>
         {% endif %}
       {% endfor %}
-      {% if songs.has_next %}
-      <a href="?page={{ songs.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
       {% endif %}
     </div>
+    {% endif %}
   </section>
 
   <aside class="sidebar">

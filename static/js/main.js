@@ -199,125 +199,269 @@
     });
   }
 
-  /* ---------- mini player ---------- */
+  /* ---------- shared audio player ---------- */
   const dock = $("#audioDock");
   const dockTitle = $("#dockTitle");
   const dockArtist = $("#dockArtist");
   const dockPlay = $("#playPause");
-  const dockBar = $("#dockBar") || (dock && $(".dock-progress i b", dock));
+  const dockBar = $("#dockBar");
   const dockCur = $("#dockCur");
-  const mediaAudio = $("[data-player-audio]");
-  let duration = 209;
-  let current = 48;
-  let timer = null;
-  let playing = false;
+  const dockDurEl = $("#dockDur");
+  const songPlayer = $("[data-song-player]");
+  const bigBtn = songPlayer ? $("[data-player-toggle]", songPlayer) : null;
+  const bigBar = songPlayer ? $("[data-player-bar]", songPlayer) : null;
+  const bigTime = songPlayer ? $("[data-player-time]", songPlayer) : null;
+  const audio = $("[data-player-audio]") || new Audio();
+  audio.preload = "metadata";
 
-  function paintDock() {
-    if (dockBar) dockBar.style.width = Math.min(100, (current / duration) * 100) + "%";
-    if (dockCur) dockCur.textContent = faTime(current);
+  function paintPlayer() {
+    const dur = isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+    const cur = audio.currentTime || 0;
+    const pct = dur ? Math.min(100, (cur / dur) * 100) : 0;
+    if (dockBar) dockBar.style.width = pct + "%";
+    if (dockCur) dockCur.textContent = faTime(cur);
+    if (dockDurEl && dur) dockDurEl.textContent = faTime(dur);
+    if (bigBar) bigBar.style.width = pct + "%";
+    if (bigTime) bigTime.textContent = faTime(cur);
+    const on = !audio.paused && !audio.ended;
+    if (dockPlay) {
+      dockPlay.textContent = on ? "⏸" : "▶";
+      dockPlay.setAttribute("aria-label", on ? "توقف" : "پخش");
+    }
+    if (bigBtn) {
+      bigBtn.textContent = on ? "⏸" : "▶";
+      bigBtn.setAttribute("aria-label", on ? "توقف" : "پخش");
+    }
+    if (songPlayer) songPlayer.classList.toggle("playing", on);
   }
-  function openDock(title, artist, seconds) {
+
+  function openDock(title, artist) {
     if (!dock) return;
     if (dockTitle) dockTitle.textContent = title || "پخش نمونه";
     if (dockArtist) dockArtist.textContent = artist || "آوا موزیک";
-    duration = seconds || 209;
-    current = 0;
-    if (mediaAudio) {
-      dock.classList.add("is-open");
-      paintDock();
-      mediaAudio.play();
+    dock.classList.add("is-open");
+  }
+
+  const HISTORY_KEY = "nava.player.history";
+  const CURRENT_KEY = "nava.player.current";
+  const HISTORY_LIMIT = 30;
+
+  function readStored(key) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      const value = raw ? JSON.parse(raw) : null;
+      return value;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeStored(key, value) {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+      /* storage unavailable (private mode) — history just won't persist */
+    }
+  }
+
+  function readHistory() {
+    const list = readStored(HISTORY_KEY);
+    return Array.isArray(list) ? list : [];
+  }
+
+  function currentTrack() {
+    const track = readStored(CURRENT_KEY);
+    return track && track.url ? track : null;
+  }
+
+  function slugFromStream(url) {
+    const match = String(url || "").match(/\/songs\/([^/]+)\/stream\/?/);
+    return match ? decodeURIComponent(match[1]) : "";
+  }
+
+  function pushHistory(track) {
+    if (!track || !track.url) return;
+    const list = readHistory().filter(function (item) { return item.url !== track.url; });
+    list.unshift({ url: track.url, title: track.title || "", artist: track.artist || "" });
+    writeStored(HISTORY_KEY, list.slice(0, HISTORY_LIMIT));
+  }
+
+  function playItem(url, title, artist, options) {
+    const opts = options || {};
+    openDock(title, artist);
+    if (!url) {
+      toast("فایل صوتی این آهنگ در دسترس نیست.");
       return;
     }
-    playing = false;
-    setPlaying(true);
-    dock.classList.add("is-open");
-    paintDock();
-    if (dock.scrollIntoView && window.innerWidth < 680) {
-      /* keep the page still; the dock is fixed */
+    const target = new URL(url, window.location.href).href;
+    if (audio.src !== target) {
+      const previous = currentTrack();
+      if (!opts.skipHistory && previous && previous.url !== url) pushHistory(previous);
+      audio.src = target;
     }
-  }
-  function setPlaying(state) {
-    playing = state;
-    if (dockPlay) dockPlay.textContent = state ? "Ⅱ" : "▶";
-    if (dockPlay) dockPlay.setAttribute("aria-label", state ? "توقف" : "پخش");
-    clearInterval(timer);
-    if (state && !mediaAudio) {
-      timer = setInterval(function () {
-        current += 1;
-        if (current >= duration) { current = duration; setPlaying(false); }
-        paintDock();
-      }, 1000);
+    writeStored(CURRENT_KEY, { url: url, title: title || "", artist: artist || "" });
+    const result = audio.play();
+    if (result && result.catch) {
+      result.catch(function () { toast("پخش امکان‌پذیر نشد؛ دوباره تلاش کنید."); });
     }
+    paintPlayer();
   }
-  if (mediaAudio) {
-    mediaAudio.addEventListener("play", function () { setPlaying(true); });
-    mediaAudio.addEventListener("pause", function () { setPlaying(false); });
-    mediaAudio.addEventListener("timeupdate", function () {
-      if (!isFinite(mediaAudio.duration) || !mediaAudio.duration) return;
-      duration = mediaAudio.duration;
-      current = mediaAudio.currentTime;
-      paintDock();
-      const bigBar = $("[data-player-bar]");
-      if (bigBar) bigBar.style.width = Math.min(100, (current / duration) * 100) + "%";
-      const bigTime = $("[data-player-time]");
-      if (bigTime) bigTime.textContent = faTime(current);
-    });
-    mediaAudio.addEventListener("ended", function () { current = 0; setPlaying(false); paintDock(); });
+
+  function playRandomSong() {
+    if (!dock) return;
+    const randomUrl = dock.dataset.randomUrl || "";
+    if (!randomUrl) {
+      toast("پخش تصادفی در دسترس نیست.");
+      return;
+    }
+    const previous = currentTrack();
+    const exclude = previous ? slugFromStream(previous.url) : "";
+    const endpoint = exclude
+      ? randomUrl + "?exclude=" + encodeURIComponent(exclude)
+      : randomUrl;
+
+    fetch(endpoint, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data.ok || !data.stream) {
+          toast(data.detail || "آهنگ تصادفی پیدا نشد.");
+          return;
+        }
+        playItem(data.stream, data.title, data.artist);
+      })
+      .catch(function () { toast("ارتباط با سرور برقرار نشد."); });
   }
+
+  function playPreviousSong() {
+    const history = readHistory();
+    const last = history.shift();
+    if (!last) {
+      audio.currentTime = 0;
+      paintPlayer();
+      return;
+    }
+    writeStored(HISTORY_KEY, history);
+    playItem(last.url, last.title, last.artist, { skipHistory: true });
+  }
+
+  audio.addEventListener("loadedmetadata", paintPlayer);
+  audio.addEventListener("timeupdate", paintPlayer);
+  audio.addEventListener("play", paintPlayer);
+  audio.addEventListener("pause", paintPlayer);
+  audio.addEventListener("ended", function () {
+    if (repeatOn) return;
+    if (shuffleOn) {
+      playRandomSong();
+      return;
+    }
+    audio.currentTime = 0;
+    paintPlayer();
+  });
+
   if (dockPlay) {
     dockPlay.addEventListener("click", function () {
       if (!dock || !dock.classList.contains("is-open")) {
         openDock(dockTitle ? dockTitle.textContent : "پخش نمونه", dockArtist ? dockArtist.textContent : "آوا موزیک");
         return;
       }
-      if (mediaAudio) {
-        if (mediaAudio.paused) mediaAudio.play(); else mediaAudio.pause();
+      if (!audio.src) {
+        toast("ابتدا یک آهنگ را انتخاب کنید.");
         return;
       }
-      setPlaying(!playing);
+      if (audio.paused) {
+        const result = audio.play();
+        if (result && result.catch) result.catch(function () {});
+      } else {
+        audio.pause();
+      }
     });
   }
+
   const closeDock = $("#closeDock");
   if (closeDock) {
     closeDock.addEventListener("click", function () {
-      if (!dock) return;
-      setPlaying(false);
-      dock.classList.remove("is-open");
+      audio.pause();
+      if (dock) dock.classList.remove("is-open");
     });
   }
-  const dockPrev = $("[data-dock-prev]");
-  const dockNext = $("[data-dock-next]");
-  if (dockPrev) dockPrev.addEventListener("click", function () { current = 0; paintDock(); });
-  if (dockNext) dockNext.addEventListener("click", function () { current = 0; paintDock(); toast("صف پخش در نسخه نهایی فعال می‌شود."); });
+
+  const dockShuffle = $("[data-dock-shuffle]");
+  const dockRepeat = $("[data-dock-repeat]");
+  const dockRandom = $("[data-dock-random]");
+  const dockHistory = $("[data-dock-history]");
+  let shuffleOn = false;
+  let repeatOn = false;
+
+  if (dockShuffle) {
+    dockShuffle.addEventListener("click", function () {
+      shuffleOn = !shuffleOn;
+      dockShuffle.classList.toggle("is-on", shuffleOn);
+      dockShuffle.setAttribute("aria-pressed", shuffleOn ? "true" : "false");
+      toast(shuffleOn ? "پخش تصادفی روشن شد." : "پخش تصادفی خاموش شد.");
+    });
+  }
+
+  if (dockRepeat) {
+    dockRepeat.addEventListener("click", function () {
+      repeatOn = !repeatOn;
+      audio.loop = repeatOn;
+      dockRepeat.classList.toggle("is-on", repeatOn);
+      dockRepeat.setAttribute("aria-pressed", repeatOn ? "true" : "false");
+      toast(repeatOn ? "تکرار آهنگ روشن شد." : "تکرار آهنگ خاموش شد.");
+    });
+  }
+
+  if (dockRandom) {
+    dockRandom.addEventListener("click", playRandomSong);
+  }
+  if (dockHistory) {
+    dockHistory.addEventListener("click", playPreviousSong);
+  }
+
+  function bindSeek(el) {
+    if (!el) return;
+    el.style.cursor = "pointer";
+    el.addEventListener("click", function (e) {
+      if (!(isFinite(audio.duration) && audio.duration > 0)) return;
+      const rect = el.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+      audio.currentTime = audio.duration * ratio;
+      paintPlayer();
+    });
+  }
+  if (dockBar && dockBar.parentElement) bindSeek(dockBar.parentElement);
+  if (songPlayer) bindSeek($(".track-progress", songPlayer));
 
   $$("[data-play]").forEach(function (el) {
     el.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
       const holder = el.closest("[data-song]") || el.closest(".music-post, .song-card, .track");
-      const title = el.dataset.song || (holder && $("h3, .track-title", holder) && $("h3, .track-title", holder).textContent.trim()) || "پخش نمونه";
-      const artist = el.dataset.artist || (holder && ($(".post-bottom b, .card-foot b, .track-title small", holder) || {}).textContent) || "آوا موزیک";
-      const secs = parseInt(el.dataset.duration || (holder && holder.dataset.duration) || "209", 10);
-      openDock(title, artist, secs);
+      const heading = holder ? $("h3, .track-title", holder) : null;
+      const title = el.dataset.song || (heading && heading.textContent.trim()) || "پخش نمونه";
+      const artistNode = holder ? $(".post-bottom b, .card-foot b, .track-title small", holder) : null;
+      const artist = el.dataset.artist || (artistNode && artistNode.textContent.trim()) || "آوا موزیک";
+      const url = el.dataset.stream || (songPlayer && songPlayer.dataset.stream) || "";
+      playItem(url, title, artist);
     });
   });
-  if (dockPlay && !$$("[data-play]").length) {
-    /* still allow the initial dock button to start the demo */
-  }
-  if (dockBar) {
-    const progress = dockBar.parentElement;
-    if (progress) {
-      progress.style.cursor = "pointer";
-      progress.addEventListener("click", function (e) {
-        const rect = progress.getBoundingClientRect();
-        const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-        current = Math.round(duration * ratio);
-        if (mediaAudio && isFinite(mediaAudio.duration) && mediaAudio.duration) {
-          mediaAudio.currentTime = mediaAudio.duration * ratio;
-        }
-        paintDock();
-      });
-    }
+
+  if (bigBtn) {
+    bigBtn.addEventListener("click", function () {
+      if (!audio.paused) {
+        audio.pause();
+        return;
+      }
+      if (!audio.src && songPlayer && songPlayer.dataset.stream) {
+        audio.src = songPlayer.dataset.stream;
+      }
+      if (!audio.src) {
+        toast("فایل صوتی این آهنگ در دسترس نیست.");
+        return;
+      }
+      const result = audio.play();
+      if (result && result.catch) result.catch(function () {});
+    });
   }
 
   /* waveform bars */
@@ -332,86 +476,7 @@
     }
   });
 
-  /* big player on song page */
-  const songPlayer = $("[data-song-player]");
-  if (songPlayer) {
-    const btn = $("[data-player-toggle]", songPlayer);
-    const bar = $("[data-player-bar]", songPlayer);
-    const time = $("[data-player-time]", songPlayer);
-    let sCurrent = 0, sDuration = 209, sTimer = null, sPlaying = false;
-    function paintPlayer() {
-      if (bar) bar.style.width = Math.min(100, (sCurrent / sDuration) * 100) + "%";
-      if (time) time.textContent = faTime(sCurrent);
-    }
-    if (btn) {
-      btn.addEventListener("click", function () {
-        if (mediaAudio) {
-          if (mediaAudio.paused) mediaAudio.play(); else mediaAudio.pause();
-          return;
-        }
-        sPlaying = !sPlaying;
-        songPlayer.classList.toggle("playing", sPlaying);
-        btn.textContent = sPlaying ? "Ⅱ" : "▶";
-        btn.setAttribute("aria-label", sPlaying ? "توقف" : "پخش");
-        clearInterval(sTimer);
-        if (sPlaying) {
-          sTimer = setInterval(function () {
-            sCurrent += 1;
-            if (sCurrent >= sDuration) { sCurrent = 0; sPlaying = false; clearInterval(sTimer); songPlayer.classList.remove("playing"); btn.textContent = "▶"; }
-            paintPlayer();
-          }, 1000);
-        }
-        openDockFromPlayer();
-      });
-    }
-    function openDockFromPlayer() {
-      if (!dock) return;
-      if (dockTitle) dockTitle.textContent = songPlayer.dataset.title || (dockTitle.textContent);
-      if (dockArtist) dockArtist.textContent = songPlayer.dataset.artist || dockArtist.textContent;
-      dock.classList.add("is-open");
-    }
-    if (mediaAudio) {
-      mediaAudio.addEventListener("play", function () {
-        songPlayer.classList.add("playing");
-        if (btn) { btn.textContent = "Ⅱ"; btn.setAttribute("aria-label", "توقف"); }
-        openDockFromPlayer();
-      });
-      mediaAudio.addEventListener("pause", function () {
-        songPlayer.classList.remove("playing");
-        if (btn) { btn.textContent = "▶"; btn.setAttribute("aria-label", "پخش"); }
-      });
-      mediaAudio.addEventListener("loadedmetadata", function () {
-        if (isFinite(mediaAudio.duration) && mediaAudio.duration) {
-          sDuration = mediaAudio.duration;
-          paintPlayer();
-        }
-      });
-      mediaAudio.addEventListener("ended", function () {
-        sCurrent = 0;
-        songPlayer.classList.remove("playing");
-        if (btn) { btn.textContent = "▶"; btn.setAttribute("aria-label", "پخش"); }
-        paintPlayer();
-      });
-    }
-    const bigProgress = $(".track-progress", songPlayer);
-    if (bigProgress) {
-      bigProgress.addEventListener("click", function (e) {
-        const rect = bigProgress.getBoundingClientRect();
-        const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-        if (mediaAudio && isFinite(mediaAudio.duration) && mediaAudio.duration) {
-          mediaAudio.currentTime = mediaAudio.duration * ratio;
-          sCurrent = mediaAudio.currentTime;
-        } else {
-          sCurrent = Math.round(sDuration * ratio);
-        }
-        paintPlayer();
-      });
-    }
-    const times = $("[data-duration]", songPlayer);
-    if (times) sDuration = parseInt(times.dataset.duration, 10) || 209;
-    if (mediaAudio && isFinite(mediaAudio.duration) && mediaAudio.duration) sDuration = mediaAudio.duration;
-    paintPlayer();
-  }
+  paintPlayer();
 
   /* ---------- filter chips ---------- */
   $$("[data-filter-group]").forEach(function (group) {

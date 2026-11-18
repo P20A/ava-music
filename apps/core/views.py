@@ -9,7 +9,7 @@ from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps.views import sitemap as sitemap_view_fn
 from django.core.cache import cache
 from django.core.mail import send_mail
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.http import (
     FileResponse,
     Http404,
@@ -32,6 +32,48 @@ from apps.music.models import Song
 from apps.playlists.models import Playlist
 
 
+def default_home_sections():
+    """Fallback layout used when no HomeSection rows are configured yet."""
+    return [
+        HomeSection(
+            section_type=HomeSection.Type.LATEST,
+            title="تازه‌ترین انتشارها",
+            subtitle="جدیدترین آهنگ‌های آوا",
+            link_label="آرشیو آهنگ‌ها ←",
+            link_url=reverse("music:list"),
+            limit=6,
+            order=1,
+        ),
+        HomeSection(
+            section_type=HomeSection.Type.POPULAR,
+            title="پیشنهاد شنیدنی",
+            subtitle="پربازدیدترین آهنگ‌ها",
+            link_label="همه آهنگ‌ها ←",
+            link_url=reverse("music:list"),
+            limit=4,
+            order=2,
+        ),
+        HomeSection(
+            section_type=HomeSection.Type.ARTISTS,
+            title="هنرمندان",
+            subtitle="خوانندگان و گروه‌های محبوب",
+            link_label="همه هنرمندان ←",
+            link_url=reverse("artists:list"),
+            limit=4,
+            order=3,
+        ),
+        HomeSection(
+            section_type=HomeSection.Type.CATEGORIES,
+            title="دسته‌بندی‌ها",
+            subtitle="موسیقی را بر اساس سبک بشنوید",
+            link_label="همه دسته‌ها ←",
+            link_url=reverse("categories:list"),
+            limit=6,
+            order=4,
+        ),
+    ]
+
+
 class HomeView(TemplateView):
     template_name = "pages/home.html"
 
@@ -39,6 +81,8 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
         published = Song.objects.published()
         sections = list(HomeSection.objects.filter(is_active=True))
+        if not sections:
+            sections = default_home_sections()
 
         built_sections = []
         for section in sections:
@@ -118,14 +162,18 @@ class HomeView(TemplateView):
                 "featured_song": published.filter(is_featured=True)
                 .select_related("primary_artist")
                 .order_by("-published_at")
-                .first(),
+                .first()
+                or published.select_related("primary_artist").order_by("-published_at").first(),
                 "latest_songs": published.select_related("primary_artist").order_by("-published_at")[:4],
-                "popular_songs": published.select_related("primary_artist").order_by("-view_count")[:5],
+                "popular_songs": published.select_related("primary_artist").order_by("-view_count", "-published_at")[:5],
                 "sidebar_categories": Category.objects.filter(is_active=True)
                 .annotate(song_total=Count("songs", filter=Q(songs__is_published=True)))
                 .order_by("order", "name")[:8],
                 "sidebar_artists": Artist.objects.active()
-                .annotate(song_total=Count("songs", filter=Q(songs__is_published=True)))
+                .annotate(
+                    song_total=Count("songs", filter=Q(songs__is_published=True)),
+                    total_plays=Sum("songs__play_count", filter=Q(songs__is_published=True)),
+                )
                 .order_by("-is_featured", "-is_verified", "name")[:4],
                 "latest_albums": Album.objects.published()
                 .annotate(track_total=Count("tracks"))

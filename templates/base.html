@@ -163,17 +163,19 @@
   </div>
 </footer>
 
-<div class="audio-dock" id="audioDock" role="region" aria-label="پخش‌کننده صوتی">
+<div class="audio-dock" id="audioDock" role="region" aria-label="پخش‌کننده صوتی" data-random-url="{% url 'music:random' %}">
   <div class="dock-song">
     <span class="dock-cover">♫</span>
     <span><b id="dockTitle">پخش نمونه</b><small id="dockArtist">آوا موزیک</small></span>
   </div>
   <div class="dock-controls">
-    <button data-dock-prev aria-label="قبلی">|◀</button>
+    <button class="dock-mini" data-dock-shuffle aria-label="پخش تصادفی" title="پخش تصادفی" aria-pressed="false">↻</button>
+    <button class="dock-nav" data-dock-history aria-label="آهنگ قبلی" title="آهنگ قبلی">◁</button>
     <button id="playPause" class="dock-play" aria-label="پخش">▶</button>
-    <button data-dock-next aria-label="بعدی">▶|</button>
+    <button class="dock-nav" data-dock-random aria-label="آهنگ تصادفی" title="آهنگ تصادفی">▷</button>
+    <button class="dock-mini" data-dock-repeat aria-label="تکرار" title="تکرار" aria-pressed="false">↺</button>
   </div>
-  <div class="dock-progress"><span id="dockCur">۰:۰۰</span><i><b id="dockBar"></b></i><span>۳:۲۹</span></div>
+  <div class="dock-progress"><span id="dockDur">۰:۰۰</span><i><b id="dockBar"></b></i><span id="dockCur">۰:۰۰</span></div>
   <button id="closeDock" class="dock-close" aria-label="بستن">×</button>
 </div>
 

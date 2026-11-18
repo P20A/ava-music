@@ -9,6 +9,7 @@ from django.views.generic import DetailView, ListView
 from apps.albums.models import Album, AlbumTrack
 from apps.analytics.models import record_view
 from apps.core.utils import fa_number
+from apps.playlists.models import Playlist
 
 
 class AlbumListView(ListView):
@@ -45,6 +46,7 @@ class AlbumListView(ListView):
             {
                 "current_type": self.request.GET.get("type", ""),
                 "current_sort": self.request.GET.get("sort", "newest"),
+                "playlist_total": Playlist.objects.public().count(),
             }
         )
         return context

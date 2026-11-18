@@ -49,7 +49,7 @@
             {% else %}
               <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
             {% endif %}
-            <span class="cover-play" data-play data-song="{{ like.song.title }}" data-artist="{{ like.song.primary_artist.name }}" data-duration="{{ like.song.duration }}">▶</span>
+            <span class="cover-play" data-play data-song="{{ like.song.title }}" data-artist="{{ like.song.primary_artist.name }}" data-duration="{{ like.song.duration }}"{% if like.song.is_playable %} data-stream="{% url 'music:stream' slug=like.song.slug %}"{% endif %}>▶</span>
           </a>
           <div class="song-card-body">
             <div class="post-meta"><span class="tag">{{ like.song.tag_label }}</span><time>{{ like.song.release_date|fa_date_short }}</time></div>

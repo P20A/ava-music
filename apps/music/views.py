@@ -11,8 +11,10 @@ from django.http import (
     HttpResponse,
     HttpResponseNotModified,
     JsonResponse,
+    StreamingHttpResponse,
 )
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_GET, require_POST
@@ -195,11 +197,6 @@ def song_stream(request, slug):
             return response
 
         length = end - start + 1
-        response = HttpResponse(status=206, content_type=content_type)
-        response["Content-Range"] = f"bytes {start}-{end}/{file_size}"
-        response["Content-Length"] = str(length)
-        response["Accept-Ranges"] = "bytes"
-        response["Cache-Control"] = "public, max-age=3600"
 
         def file_iterator(file_path, start_byte, length_bytes):
             with open(file_path, "rb") as f:
@@ -213,7 +210,16 @@ def song_stream(request, slug):
                     remaining -= len(chunk)
                     yield chunk
 
-        response.streaming_content = file_iterator(path, start, length)
+        response = StreamingHttpResponse(
+            file_iterator(path, start, length),
+            status=206,
+            content_type=content_type,
+        )
+        response["Content-Range"] = f"bytes {start}-{end}/{file_size}"
+        response["Content-Length"] = str(length)
+        response["Accept-Ranges"] = "bytes"
+        response["Cache-Control"] = "public, max-age=3600"
+        response["X-Content-Type-Options"] = "nosniff"
         return response
 
     if_none_match = request.META.get("HTTP_IF_NONE_MATCH")
@@ -393,3 +399,37 @@ def related_songs_api(request, slug):
         for s in related
     ]
     return JsonResponse({"results": data})
+
+
+@require_GET
+def random_song_api(request):
+    """Return one random playable song, used by the player's «next» button."""
+
+    qs = Song.objects.published().filter(
+        Q(audio_320__gt="") | Q(audio_128__gt="") | Q(preview_audio__gt="")
+    )
+
+    exclude = (request.GET.get("exclude") or "").strip()
+    if exclude:
+        qs = qs.exclude(slug=exclude)
+
+    song = qs.select_related("primary_artist").order_by("?").first()
+
+    if song is None:
+        return JsonResponse(
+            {"ok": False, "detail": "آهنگ قابل پخشی برای پخش تصادفی پیدا نشد."},
+            status=404,
+        )
+
+    stream = reverse("music:stream", args=[song.slug])
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "slug": song.slug,
+            "title": song.title,
+            "artist": song.primary_artist.name if song.primary_artist else "",
+            "stream": stream,
+            "url": song.get_absolute_url(),
+        }
+    )

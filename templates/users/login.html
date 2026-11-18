@@ -6,6 +6,7 @@
 {% block page_name %}login{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>ورود</b></nav>
 
 <div class="wrap" style="max-width:420px;">
@@ -53,5 +54,6 @@
       <p style="color:var(--muted);">حساب کاربری ندارید؟ <a href="{% url 'users:register' %}">ثبت‌نام رایگان</a></p>
     </div>
   </section>
+</div>
 </div>
 {% endblock %}

@@ -14,4 +14,5 @@ urlpatterns = [
     path("<uslug:slug>/like/", views.song_like, name="like"),
     path("<uslug:slug>/comment/", views.song_comment, name="comment"),
     path("api/related/<uslug:slug>/", views.related_songs_api, name="related_api"),
+    path("api/random/", views.random_song_api, name="random"),
 ]

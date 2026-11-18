@@ -8,6 +8,7 @@
 {% block page_name %}albums{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آلبوم‌ها</b></nav>
 
 <section class="page-hero">
@@ -17,20 +18,20 @@
     <p>مجموعه‌های کامل موسیقی، آلبوم‌های رسمی، ای‌پی‌ها و پلی‌لیست‌های منتخب برای شنیدن مداوم.</p>
   </div>
   <div class="hero-stats">
-    <div class="hero-stat"><b>{{ albums.paginator.count|default:0 }}</b><small>آلبوم</small></div>
-    <div class="hero-stat"><b>{{ playlists.paginator.count|default:0 }}</b><small>پلی‌لیست</small></div>
+    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>آلبوم</small></div>
+    <div class="hero-stat"><b>{{ playlist_total|fa_number }}</b><small>پلی‌لیست</small></div>
   </div>
 </section>
 
 <div class="toolbar">
   <div class="chip-row">
-    <button class="chip {% if not current_type %}active{% endif %}" data-filter="all">همه</button>
-    <button class="chip {% if current_type == 'album' %}active{% endif %}" data-filter="album">آلبوم رسمی</button>
-    <button class="chip {% if current_type == 'ep' %}active{% endif %}" data-filter="ep">ای‌پی</button>
-    <button class="chip {% if current_type == 'single' %}active{% endif %}" data-filter="single">تک‌آهنگ</button>
-    <button class="chip {% if current_type == 'compilation' %}active{% endif %}" data-filter="compilation">گردآوری</button>
-    <button class="chip {% if current_type == 'soundtrack' %}active{% endif %}" data-filter="soundtrack">موسیقی متن</button>
-    <button class="chip {% if current_type == 'live' %}active{% endif %}" data-filter="live">اجرای زنده</button>
+    <a class="chip {% if not current_type %}active{% endif %}" href="?sort={{ current_sort }}">همه</a>
+    <a class="chip {% if current_type == 'album' %}active{% endif %}" href="?type=album&sort={{ current_sort }}">آلبوم رسمی</a>
+    <a class="chip {% if current_type == 'ep' %}active{% endif %}" href="?type=ep&sort={{ current_sort }}">ای‌پی</a>
+    <a class="chip {% if current_type == 'single' %}active{% endif %}" href="?type=single&sort={{ current_sort }}">تک‌آهنگ</a>
+    <a class="chip {% if current_type == 'compilation' %}active{% endif %}" href="?type=compilation&sort={{ current_sort }}">گردآوری</a>
+    <a class="chip {% if current_type == 'soundtrack' %}active{% endif %}" href="?type=soundtrack&sort={{ current_sort }}">موسیقی متن</a>
+    <a class="chip {% if current_type == 'live' %}active{% endif %}" href="?type=live&sort={{ current_sort }}">اجرای زنده</a>
   </div>
   <span class="spacer"></span>
   <select class="field-select" onchange="window.location.href=this.value">
@@ -59,7 +60,7 @@
     <small>{% if album.artists.first %}{{ album.artists.first.name }}{% else %}مجموعه{% endif %} · {{ album.track_total }} قطعه · {{ album.release_date|fa_date_short }}</small>
   </a>
   {% empty %}
-  <p class="empty-state">هیچ آلبومی یافت نشد.</p>
+  <p class="empty-state show">هیچ آلبومی یافت نشد.</p>
   {% endfor %}
 </div>
 
@@ -84,19 +85,22 @@
   {% endfor %}
 </div>
 
+{% if paginator.num_pages > 1 %}
 <div class="pagination">
-  {% if albums.has_previous %}
-  <a href="?page={{ albums.previous_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
   {% endif %}
-  {% for num in albums.paginator.page_range %}
-    {% if albums.number == num %}
-    <a class="page-active" href="#">{{ num }}</a>
-    {% elif num > albums.number|add:-3 and num < albums.number|add:3 %}
-    <a href="?page={{ num }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+  {% for num in paginator.page_range %}
+    {% if page_obj.number == num %}
+    <a class="page-active" href="#">{{ num|fa_number }}</a>
+    {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+    <a href="?page={{ num }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num|fa_number }}</a>
     {% endif %}
   {% endfor %}
-  {% if albums.has_next %}
-  <a href="?page={{ albums.next_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
   {% endif %}
+</div>
+{% endif %}
 </div>
 {% endblock %}

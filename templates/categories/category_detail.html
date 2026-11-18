@@ -12,6 +12,7 @@
 {% block page_name %}category{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'categories:list' %}">دسته‌بندی‌ها</a><i>›</i><b>{{ category.name }}</b></nav>
 
 <section class="page-hero">
@@ -52,7 +53,7 @@
       {% else %}
         <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
       {% endif %}
-      <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+      <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}"{% if song.is_playable %} data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}>▶</span>
     </a>
     <div class="song-card-body">
       <div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date_short }}</time></div>
@@ -92,4 +93,5 @@
   </div>
 </section>
 {% endif %}
+</div>
 {% endblock %}

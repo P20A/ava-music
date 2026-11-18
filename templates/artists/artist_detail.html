@@ -12,6 +12,7 @@
 {% block page_name %}artist{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'artists:list' %}">خوانندگان</a><i>›</i><b>{{ artist.name }}</b></nav>
 
 <section class="artist-hero">
@@ -69,7 +70,7 @@
         {% else %}
           <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
         {% endif %}
-        <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+        <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}"{% if song.is_playable %} data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}>▶</span>
       </a>
       <div class="post-body">
         <div class="post-meta">
@@ -126,6 +127,7 @@
       <div class="info-item"><span>زبان</span><b>{{ artist.songs.first.get_language_display|default:"فارسی" }}</b></div>
     </div>
   </div>
+</div>
 </div>
 {% endblock %}
 

@@ -12,6 +12,7 @@
 {% block page_name %}song{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه">
   <a href="{% url 'core:home' %}">خانه</a>
   <i>›</i>
@@ -55,7 +56,7 @@
     </div>
     <p>{{ song.description|default:"توضیحات برای این آهنگ موجود نیست." }}</p>
     <div class="hero-actions">
-      <button class="btn btn-primary" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶ پخش آنلاین</button>
+      <button class="btn btn-primary" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}"{% if song.is_playable %} data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}>▶ پخش آنلاین</button>
       <a class="btn btn-ghost" href="#downloads">↓ دانلود آهنگ</a>
       <button class="btn btn-soft" data-like data-song="{{ song.slug }}" data-count="{{ song.like_count }}" data-like-url="{% url 'music:like' song.slug %}" aria-label="پسندیدن">♡ {{ song.like_count|fa_number }}</button>
     </div>
@@ -73,6 +74,7 @@
   data-title="{{ song.title }} — {{ song.primary_artist.name }}" 
   data-artist="{{ song.primary_artist.name }}" 
   data-duration="{{ song.duration }}"
+  {% if song.is_playable %}data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}
   data-song-slug="{{ song.slug }}">
   {% if song.is_playable %}
   <audio data-player-audio preload="metadata" src="{% url 'music:stream' slug=song.slug %}"></audio>
@@ -85,7 +87,7 @@
     {% endif %}
   </div>
   <div class="track-progress" role="slider" aria-label="پیشرفت پخش" aria-valuemin="0" aria-valuemax="{{ song.duration }}" aria-valuenow="0" tabindex="0"><b data-player-bar></b></div>
-  <div class="player-time"><span data-player-time>۰:۰۰</span><span data-duration="{{ song.duration }}">{{ song.duration|fa_duration }}</span></div>
+  <div class="player-time"><span data-duration="{{ song.duration }}">{{ song.duration|fa_duration }}</span><span data-player-time>۰:۰۰</span></div>
 </div>
 
 <section class="panel" id="downloads" style="margin-top:16px">
@@ -188,7 +190,7 @@
         {% else %}
           <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
         {% endif %}
-        <span class="cover-play" data-play data-song="{{ related.title }}" data-artist="{{ related.primary_artist.name }}" data-duration="{{ related.duration }}">▶</span>
+        <span class="cover-play" data-play data-song="{{ related.title }}" data-artist="{{ related.primary_artist.name }}" data-duration="{{ related.duration }}"{% if related.is_playable %} data-stream="{% url 'music:stream' slug=related.slug %}"{% endif %}>▶</span>
       </a>
       <div class="song-card-body">
         <div class="post-meta"><span class="tag">{{ related.tag_label }}</span><time>{{ related.release_date|fa_date_short }}</time></div>
@@ -201,6 +203,7 @@
   </div>
 </section>
 {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_js %}

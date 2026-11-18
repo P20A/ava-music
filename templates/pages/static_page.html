@@ -12,6 +12,7 @@
 {% block page_name %}page{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>{{ page.title }}</b></nav>
 
 <article class="static-page">
@@ -25,4 +26,5 @@
     {{ page.content|safe }}
   </div>
 </article>
+</div>
 {% endblock %}

@@ -9,14 +9,16 @@ from django.views.generic import DetailView, ListView
 
 from apps.analytics.models import record_view
 from apps.artists.models import Artist, ArtistFollow
+from apps.albums.models import Album
 from apps.core.utils import visitor_key
+from apps.music.models import Song
 
 
 class ArtistListView(ListView):
     model = Artist
     template_name = "artists/artist_list.html"
     context_object_name = "artists"
-    paginate_by = 24
+    paginate_by = 8
 
     def get_queryset(self):
         qs = Artist.objects.active().annotate(
@@ -24,10 +26,6 @@ class ArtistListView(ListView):
             album_total=Count("albums", filter=Q(albums__is_published=True)),
             total_plays=Sum("songs__play_count"),
         )
-
-        letter = self.request.GET.get("letter")
-        if letter and letter != "all":
-            qs = qs.filter(name__istartswith=letter)
 
         sort = self.request.GET.get("sort", "popular")
         if sort == "newest":
@@ -43,8 +41,9 @@ class ArtistListView(ListView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                "current_letter": self.request.GET.get("letter", "all"),
                 "current_sort": self.request.GET.get("sort", "popular"),
+                "total_albums": Album.objects.published().count(),
+                "total_songs": Song.objects.published().count(),
             }
         )
         return context

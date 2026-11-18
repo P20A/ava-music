@@ -8,6 +8,7 @@
 {% block page_name %}categories{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>دسته‌بندی‌ها</b></nav>
 
 <section class="page-hero">
@@ -35,7 +36,8 @@
     </div>
   </a>
   {% empty %}
-  <p class="empty-state">هیچ دسته‌بندی یافت نشد.</p>
+  <p class="empty-state show">هیچ دسته‌بندی یافت نشد.</p>
   {% endfor %}
+</div>
 </div>
 {% endblock %}

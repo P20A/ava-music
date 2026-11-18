@@ -8,6 +8,7 @@
 {% block page_name %}songs{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه">
   <a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آهنگ‌ها</b>
 </nav>
@@ -21,7 +22,7 @@
   <div class="chip-row" id="songCategories">
     <button class="chip active" data-filter="all">همه</button>
     {% for cat in categories %}
-    <button class="chip" data-filter="{{ cat.slug }}">{{ cat.name }}</button>
+    <button class="chip" data-filter="{{ cat.name }}">{{ cat.name }}</button>
     {% endfor %}
   </div>
   <span class="spacer"></span>
@@ -33,23 +34,20 @@
   </select>
 </div>
 
-<div class="song-grid" id="songGrid" data-filter-group>
-  {% for song in songs %}
-  {% include "includes/song_card.html" with items=songs only %}
-  {% empty %}
-  <p class="empty-state" id="songEmpty">هیچ آهنگی یافت نشد.</p>
-  {% endfor %}
+<div class="song-grid" id="songGrid">
+  {% include "includes/song_card.html" with items=songs %}
 </div>
 
-{% if songs.has_other_pages %}
+{% if paginator.num_pages > 1 %}
 <nav class="pagination" aria-label="صفحه‌بندی">
-  {% if songs.has_previous %}
-  <a href="?page={{ songs.previous_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه قبل">‹ قبلی</a>
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه قبل">‹ قبلی</a>
   {% endif %}
-  <span class="page-info">صفحه {{ songs.number }} از {{ songs.paginator.num_pages }}</span>
-  {% if songs.has_next %}
-  <a href="?page={{ songs.next_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه بعد">بعدی ›</a>
+  <span class="page-info">صفحه {{ page_obj.number|fa_number }} از {{ paginator.num_pages|fa_number }}</span>
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه بعد">بعدی ›</a>
   {% endif %}
 </nav>
 {% endif %}
+</div>
 {% endblock %}

@@ -6,6 +6,7 @@
 {% block page_name %}artist-songs{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="breadcrumb" aria-label="مسیر">
   <a href="{% url 'core:home' %}">خانه</a>
   <a href="{% url 'artists:list' %}">هنرمندان</a>
@@ -35,4 +36,5 @@
   </div>
   {% endif %}
 </section>
+</div>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n humanize %}
+{% load static i18n humanize persian_filters %}
 
 {% block title %}{{ site.site_name }} - {% if site.site_tagline %}{{ site.site_tagline }}{% endif %}{% endblock %}
 
@@ -8,74 +8,158 @@
 {% block page_name %}home{% endblock %}
 
 {% block content %}
-<div class="breaking">
-  <b>پیشنهاد آوا</b>
-  <div class="ticker">
-    <span>جدیدترین انتشارهای موسیقی را از دست ندهید</span>
-    <a href="#new">مشاهده فهرست امروز ←</a>
-  </div>
-</div>
-
-{% if featured_song %}
-<section class="featured" id="special">
-  <div class="featured-image">
-    {% if featured_song.cover_image %}
-      <img src="{{ featured_song.cover_image.url }}" alt="کاور {{ featured_song.title }}">
-    {% else %}
-      <img src="{% static 'images/cover-1.svg' %}" alt="کاور پیش‌فرض">
-    {% endif %}
-    <span class="featured-label">انتخاب سردبیر</span>
-  </div>
-  <div class="featured-text">
-    <span class="eyebrow">ویژه امروز · انتشار تازه</span>
-    <h1>{{ featured_song.title }}</h1>
-    <p>{{ featured_song.short_description|default:"از تازه‌ترین تک‌آهنگ‌ها تا آلبوم‌ها و ریمیکس‌های محبوب؛ همه‌چیز در یک آرشیو مرتب و همیشه به‌روز." }}</p>
-    <a class="solid-link" href="{{ featured_song.get_absolute_url }}">مشاهده و دانلود <b>←</b></a>
-  </div>
-</section>
-{% endif %}
-
-{% for section_data in home_sections %}
-  {% if section_data.items %}
-  <section class="content-section" id="{{ section_data.section.section_type }}">
-    <div class="section-title">
-      <div>
-        <span>{{ section_data.section.title }}</span>
-        {% if section_data.section.subtitle %}
-        <h2>{{ section_data.section.subtitle }}</h2>
-        {% endif %}
-      </div>
-      {% if section_data.section.link_url %}
-      <a href="{{ section_data.section.link_url }}">{{ section_data.section.link_label|default:"مشاهده همه ←" }}</a>
-      {% endif %}
+<div class="main-column">
+  <div class="breaking">
+    <b>پیشنهاد آوا</b>
+    <div class="ticker">
+      <span>جدیدترین انتشارهای موسیقی را از دست ندهید</span>
+      <a href="#new">مشاهده فهرست امروز ←</a>
     </div>
-    
-    {% include section_data.template with items=section_data.items section=section_data.section only %}
+  </div>
+
+  {% if featured_song %}
+  <section class="featured" id="special">
+    <div class="featured-image">
+      {% if featured_song.cover_image %}
+        <img src="{{ featured_song.cover_image.url }}" alt="کاور {{ featured_song.title }}">
+      {% else %}
+        <img src="{% static 'images/cover-1.svg' %}" alt="کاور پیش‌فرض">
+      {% endif %}
+      <span class="featured-label">انتخاب سردبیر</span>
+    </div>
+    <div class="featured-text">
+      <span class="eyebrow">ویژه امروز · انتشار تازه</span>
+      <h1>{{ featured_song.title }}</h1>
+      <p>{{ featured_song.short_description|default:"از تازه‌ترین تک‌آهنگ‌ها تا آلبوم‌ها و ریمیکس‌های محبوب؛ همه‌چیز در یک آرشیو مرتب و همیشه به‌روز." }}</p>
+      <a class="solid-link" href="{{ featured_song.get_absolute_url }}">مشاهده و دانلود <b>←</b></a>
+    </div>
   </section>
   {% endif %}
-{% endfor %}
 
-{% if latest_albums %}
-<section class="content-section" id="albums">
-  <div class="section-title">
-    <div><span>مجموعه‌های شنیدنی</span><h2>آلبوم‌ها و پلی‌لیست‌ها</h2></div>
-    <a href="{% url 'albums:list' %}">آرشیو کامل ←</a>
-  </div>
-  <div class="album-grid">
-    {% for album in latest_albums %}
-    <a class="album-card" href="{{ album.get_absolute_url }}">
-      {% if album.cover %}
-        <img src="{{ album.cover.url }}" alt="{{ album.title }}" loading="lazy">
+  {% for section_data in home_sections %}
+    {% if section_data.items %}
+    <section class="content-section" id="{{ section_data.section.section_type }}">
+      <div class="section-title">
+        <div>
+          <span>{{ section_data.section.title }}</span>
+          {% if section_data.section.subtitle %}
+          <h2>{{ section_data.section.subtitle }}</h2>
+          {% endif %}
+        </div>
+        {% if section_data.section.link_url %}
+        <a href="{{ section_data.section.link_url }}">{{ section_data.section.link_label|default:"مشاهده همه ←" }}</a>
+        {% endif %}
+      </div>
+
+      {% if section_data.template == "includes/artist_card.html" %}
+      <div class="artist-grid">
+      {% elif section_data.template == "includes/category_card.html" %}
+      <div class="category-grid">
+      {% elif section_data.template == "includes/album_card.html" %}
+      <div class="album-grid">
+      {% elif section_data.template == "includes/song_card.html" %}
+      <div class="song-grid">
       {% else %}
-        <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+      <div class="post-list">
       {% endif %}
-      <b>{{ album.title }}</b>
-      <small>{{ album.artists.first.name|default:"مجموعه" }} · {{ album.track_total }} قطعه</small>
-    </a>
-    {% endfor %}
+        {% include section_data.template with items=section_data.items section=section_data.section only %}
+      </div>
+    </section>
+    {% endif %}
+  {% endfor %}
+
+  {% if latest_albums %}
+  <section class="content-section" id="albums">
+    <div class="section-title">
+      <div><span>مجموعه‌های شنیدنی</span><h2>آلبوم‌ها و پلی‌لیست‌ها</h2></div>
+      <a href="{% url 'albums:list' %}">آرشیو کامل ←</a>
+    </div>
+    <div class="album-grid">
+      {% for album in latest_albums %}
+      <a class="album-card" href="{{ album.get_absolute_url }}">
+        {% if album.cover %}
+          <img src="{{ album.cover.url }}" alt="{{ album.title }}" loading="lazy">
+        {% else %}
+          <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+        {% endif %}
+        <b>{{ album.title }}</b>
+        <small>{{ album.artists.first.name|default:"مجموعه" }} · {{ album.track_total }} قطعه</small>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+
+<aside class="sidebar">
+  {% if popular_songs %}
+  <div class="side-box">
+    <div class="side-heading">
+      <h2>پربازدیدترین آهنگ‌ها</h2>
+      <a href="{% url 'music:list' %}">همه ←</a>
+    </div>
+    <ol class="popular-list">
+      {% for song in popular_songs %}
+      <li>
+        <span class="rank">{{ forloop.counter|fa_number }}</span>
+        <div>
+          <b><a href="{{ song.get_absolute_url }}">{{ song.title }}</a></b>
+          <small>{{ song.primary_artist.name }}</small>
+        </div>
+        <span class="views">{{ song.view_count|fa_number }}</span>
+      </li>
+      {% endfor %}
+    </ol>
   </div>
-</section>
-{% endif %}
+  {% endif %}
+
+  {% if sidebar_categories %}
+  <div class="side-box">
+    <div class="side-heading">
+      <h2>دسته‌بندی‌ها</h2>
+      <span>♫</span>
+    </div>
+    <div class="category-links">
+      {% for category in sidebar_categories %}
+      <a href="{{ category.get_absolute_url }}">
+        <span>{{ category.icon|default:"♪" }}</span>{{ category.name }}
+        <b>{{ category.song_total|fa_number }}</b>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="side-promo">
+    <span>AVA MUSIC</span>
+    <b>آرشیو موسیقی<br>همیشه به‌روز</b>
+    <small>دانلود و پخش آنلاین تازه‌ترین آهنگ‌ها، آلبوم‌ها و ریمیکس‌ها</small>
+  </div>
+
+  {% if sidebar_artists %}
+  <div class="side-box">
+    <div class="side-heading">
+      <h2>خوانندگان پرطرفدار</h2>
+      <a href="{% url 'artists:list' %}">همه ←</a>
+    </div>
+    <div class="artist-list">
+      {% for artist in sidebar_artists %}
+      <a href="{{ artist.get_absolute_url }}">
+        {% if artist.profile_image %}
+          <img src="{{ artist.profile_image.url }}" alt="{{ artist.name }}" loading="lazy">
+        {% else %}
+          <img src="{% static 'images/artist-1.svg' %}" alt="" loading="lazy">
+        {% endif %}
+        <span>
+          <b>{{ artist.name }}</b>
+          <small>{{ artist.song_total|fa_number }} آهنگ · {{ artist.total_plays|default:0|fa_number }} پخش</small>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</aside>
 {% endblock %}
 
 {% block extra_js %}

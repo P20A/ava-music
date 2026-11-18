@@ -12,6 +12,7 @@
 {% block page_name %}album{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'albums:list' %}">آلبوم‌ها</a><i>›</i><b>{{ album.title }}</b></nav>
 
 <article class="album-hero">
@@ -49,7 +50,7 @@
       </div>
       <span class="track-time">{{ track.song.duration|fa_duration }}</span>
       <div class="track-actions">
-        <button class="icon-btn" data-play data-song="{{ track.song.title }}" data-artist="{{ track.song.primary_artist.name }}" data-duration="{{ track.song.duration }}" aria-label="پخش {{ track.song.title }}">▶</button>
+        <button class="icon-btn" data-play data-song="{{ track.song.title }}" data-artist="{{ track.song.primary_artist.name }}" data-duration="{{ track.song.duration }}"{% if track.song.is_playable %} data-stream="{% url 'music:stream' slug=track.song.slug %}"{% endif %} aria-label="پخش {{ track.song.title }}">▶</button>
         {% if track.song.has_320 %}
         <a class="icon-btn" href="{{ track.song.get_absolute_url }}download/320/" aria-label="دانلود {{ track.song.title }} ۳۲۰">↓</a>
         {% endif %}
@@ -96,4 +97,5 @@
   </div>
 </section>
 {% endif %}
+</div>
 {% endblock %}

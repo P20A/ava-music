@@ -46,7 +46,7 @@
       </div>
       <span class="track-time">{{ item.song.duration|fa_duration }}</span>
       <div class="track-actions">
-        <button class="icon-btn" data-play data-song="{{ item.song.title }}" data-artist="{{ item.song.primary_artist.name }}" data-duration="{{ item.song.duration }}" aria-label="پخش {{ item.song.title }}">▶</button>
+        <button class="icon-btn" data-play data-song="{{ item.song.title }}" data-artist="{{ item.song.primary_artist.name }}" data-duration="{{ item.song.duration }}"{% if item.song.is_playable %} data-stream="{% url 'music:stream' slug=item.song.slug %}"{% endif %} aria-label="پخش {{ item.song.title }}">▶</button>
         {% if item.song.has_320 %}
         <a class="icon-btn" href="{{ item.song.get_absolute_url }}download/320/" aria-label="دانلود {{ item.song.title }} ۳۲۰">↓</a>
         {% endif %}

@@ -13,7 +13,7 @@
     {% else %}
       <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
     {% endif %}
-    <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+    <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}"{% if song.is_playable %} data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}>▶</span>
   </a>
   <div class="song-card-body">
     <div class="post-meta">

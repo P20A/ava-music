@@ -6,6 +6,7 @@
 {% block page_name %}submission_success{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>ارسال اثر</b></nav>
 
 <section class="page-hero" style="text-align:center;padding:60px 20px;">
@@ -34,4 +35,5 @@
     <a href="{% url 'submissions:create' %}" class="btn btn-ghost" style="margin-top:16px;display:inline-block;">ارسال اثر دیگر</a>
   </div>
 </section>
+</div>
 {% endblock %}

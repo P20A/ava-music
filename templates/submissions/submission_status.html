@@ -6,6 +6,7 @@
 {% block page_name %}submission_status{% endblock %}
 
 {% block content %}
+<div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>پیگیری ارسال</b></nav>
 
 <section class="page-hero">
@@ -88,5 +89,6 @@
       {% endif %}
     </div>
   </div>
+</div>
 </div>
 {% endblock %}
