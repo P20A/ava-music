@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="کاور موسیقی">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#091540"/><stop offset="1" stop-color="#7692FF"/></linearGradient>
+    <radialGradient id="h" cx="0.72" cy="0.18" r="0.9"><stop offset="0" stop-color="#ABD2FA" stop-opacity="0.42"/><stop offset="1" stop-color="#ABD2FA" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <rect width="600" height="600" fill="url(#h)"/>
+  <g fill="none" stroke="#ABD2FA" stroke-opacity="0.28" stroke-width="2">
+    <circle cx="230" cy="280" r="70"/><circle cx="230" cy="280" r="122"/><circle cx="230" cy="280" r="182"/>
+  </g>
+  <circle cx="230" cy="280" r="26" fill="#ABD2FA" fill-opacity="0.85"/>
+  <circle cx="470" cy="100" r="120" fill="#ABD2FA" fill-opacity="0.08"/>
+  <g><rect x="40" y="467" width="10" height="43" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="69" y="488" width="10" height="22" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="98" y="451" width="10" height="59" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="127" y="472" width="10" height="38" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="156" y="493" width="10" height="17" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="185" y="456" width="10" height="54" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="214" y="477" width="10" height="33" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="243" y="440" width="10" height="70" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="272" y="461" width="10" height="49" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="301" y="482" width="10" height="28" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="330" y="445" width="10" height="65" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="359" y="466" width="10" height="44" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="388" y="487" width="10" height="23" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="417" y="450" width="10" height="60" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="446" y="471" width="10" height="39" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="475" y="492" width="10" height="18" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="504" y="455" width="10" height="55" rx="5" fill="#fff" fill-opacity="0.14"/><rect x="533" y="476" width="10" height="34" rx="5" fill="#fff" fill-opacity="0.14"/></g>
+  <text x="40" y="565" fill="#ABD2FA" font-family="Arial, sans-serif" font-size="17" letter-spacing="7" opacity="0.65">AVA MUSIC</text>
+</svg>
