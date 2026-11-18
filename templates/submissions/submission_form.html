@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}ارسال اثر | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}ارسال آهنگ، آلبوم یا موزیک‌ویدیو برای انتشار در {{ site.site_name }}. فرم ساده و سریع برای هنرمندان.{% endblock %}
+
+{% block page_name %}submission{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>ارسال اثر</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">SUBMIT · ارسال اثر</span>
+    <h1>موسیقی خود را با ما به اشتراک بگذارید</h1>
+    <p>فرم زیر را تکمیل کنید. تیم تحریریه بررسی و در صورت تایید، اثر شما را منتشر می‌کند.</p>
+  </div>
+</section>
+
+<div class="wrap page-layout">
+  <section class="main-column">
+    <section class="panel">
+      <div class="panel-head"><h2>فرم ارسال اثر</h2><span>فیلدهای ستاره‌دار الزامی هستند</span></div>
+      <form method="post" action="{% url 'submissions:create' %}" enctype="multipart/form-data" class="comment-form" data-demo-form>
+        {% csrf_token %}
+        
+        <div class="form-grid">
+          <label class="field">
+            <span>نام هنرمند *</span>
+            <input class="input" type="text" name="artist_name" placeholder="مثال: آرمان راد" value="{{ form.artist_name.value|default:'' }}" required>
+            {% if form.artist_name.errors %}<span class="error">{{ form.artist_name.errors.0 }}</span>{% endif %}
+          </label>
+          <label class="field">
+            <span>هنرمندان همراه</span>
+            <input class="input" type="text" name="featured_artists" placeholder="مثال: رها، دنیز" value="{{ form.featured_artists.value|default:'' }}">
+          </label>
+          <label class="field">
+            <span>نام اثر *</span>
+            <input class="input" type="text" name="title" placeholder="مثال: شب بارونی" value="{{ form.title.value|default:'' }}" required>
+            {% if form.title.errors %}<span class="error">{{ form.title.errors.0 }}</span>{% endif %}
+          </label>
+          <label class="field">
+            <span>سبک *</span>
+            <select class="input" name="genre" required>
+              <option value="">انتخاب کنید</option>
+              {% for cat in form.fields.genre.queryset %}
+              <option value="{{ cat.pk }}" {% if form.genre.value == cat.pk %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+            {% if form.genre.errors %}<span class="error">{{ form.genre.errors.0 }}</span>{% endif %}
+          </label>
+        </div>
+
+        <div class="form-grid" style="margin-top:16px;">
+          <label class="field">
+            <span>کاور *</span>
+            <input class="file-input" type="file" name="cover_image" accept="image/*" required>
+            <span class="file-name">فایل خود را انتخاب کنید یا اینجا رها کنید</span>
+            {% if form.cover_image.errors %}<span class="error">{{ form.cover_image.errors.0 }}</span>{% endif %}
+          </label>
+          <label class="field">
+            <span>فایل ۳۲۰ کیلوبیت *</span>
+            <input class="file-input" type="file" name="audio_320" accept="audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/aac,audio/wav,audio/ogg,audio/flac" required>
+            <span class="file-name">فایل خود را انتخاب کنید یا اینجا رها کنید</span>
+            {% if form.audio_320.errors %}<span class="error">{{ form.audio_320.errors.0 }}</span>{% endif %}
+          </label>
+          <label class="field">
+            <span>فایل ۱۲۸ کیلوبیت</span>
+            <input class="file-input" type="file" name="audio_128" accept="audio/mpeg,audio/mp3,audio/mp4,audio/x-m4a,audio/aac,audio/wav,audio/ogg,audio/flac">
+            <span class="file-name">فایل خود را انتخاب کنید یا اینجا رها کنید</span>
+            {% if form.audio_128.errors %}<span class="error">{{ form.audio_128.errors.0 }}</span>{% endif %}
+          </label>
+        </div>
+
+        <div class="form-grid" style="margin-top:16px;">
+          <label class="field full">
+            <span>متن ترانه</span>
+            <textarea class="textarea" name="lyrics" placeholder="متن ترانه را اینجا بنویسید...">{{ form.lyrics.value|default:'' }}</textarea>
+          </label>
+          <label class="field full">
+            <span>توضیحات اثر</span>
+            <textarea class="textarea" name="description" placeholder="درباره اثر، تنظیم، میکس، مسترینگ و...">{{ form.description.value|default:'' }}</textarea>
+          </label>
+        </div>
+
+        <div class="panel" style="margin-top:16px;padding:16px;background:var(--secondary);border-radius:var(--radius);">
+          <h3 style="margin-bottom:12px;">اطلاعات تماس *</h3>
+          <div class="form-grid">
+            <label class="field">
+              <span>نام تماس *</span>
+              <input class="input" type="text" name="contact_name" placeholder="نام و نام خانوادگی" value="{{ form.contact_name.value|default:'' }}" required>
+              {% if form.contact_name.errors %}<span class="error">{{ form.contact_name.errors.0 }}</span>{% endif %}
+            </label>
+            <label class="field">
+              <span>ایمیل تماس *</span>
+              <input class="input" type="email" name="contact_email" placeholder="email@example.com" value="{{ form.contact_email.value|default:'' }}" required>
+              {% if form.contact_email.errors %}<span class="error">{{ form.contact_email.errors.0 }}</span>{% endif %}
+            </label>
+            <label class="field">
+              <span>تلفن تماس</span>
+              <input class="input" type="tel" name="contact_phone" placeholder="۰۹xxxxxxxxx" value="{{ form.contact_phone.value|default:'' }}">
+            </label>
+            <label class="field">
+              <span>لینک دمو/فایل (اختیاری)</span>
+              <input class="input" type="url" name="demo_url" placeholder="https://..." value="{{ form.demo_url.value|default:'' }}">
+            </label>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:16px;padding:16px;background:var(--secondary);border-radius:var(--radius);">
+          <h3 style="margin-bottom:12px;">حقوق و مجوز *</h3>
+          <div class="form-grid">
+            <label class="field">
+              <span>صاحب حقوق *</span>
+              <input class="input" type="text" name="rights_holder" placeholder="نام صاحب اثر/حقوق" value="{{ form.rights_holder.value|default:'' }}" required>
+              {% if form.rights_holder.errors %}<span class="error">{{ form.rights_holder.errors.0 }}</span>{% endif %}
+            </label>
+            <label class="field">
+              <span>وضعیت مجوز *</span>
+              <select class="input" name="license_status" required>
+                <option value="owned" {% if form.license_status.value == 'owned' %}selected{% endif %}>مالکیت کامل اثر</option>
+                <option value="licensed" {% if form.license_status.value == 'licensed' %}selected{% endif %}>دارای مجوز رسمی</option>
+                <option value="permitted" {% if form.license_status.value == 'permitted' %}selected{% endif %}>اجازه کتبی صاحب اثر</option>
+                <option value="unknown" {% if form.license_status.value == 'unknown' %}selected{% endif %}>نامشخص</option>
+              </select>
+            </label>
+            <label class="field full">
+              <span>مرجع مجوز (شماره قرارداد و...)</span>
+              <input class="input" type="text" name="license_reference" placeholder="اختیاری" value="{{ form.license_reference.value|default:'' }}">
+            </label>
+            <label class="field full">
+              <span>مدرک مجوز (PDF/تصویر/ZIP)</span>
+              <input class="file-input" type="file" name="permission_document" accept=".pdf,.jpg,.jpeg,.png,.zip">
+              <span class="file-name">فایل خود را انتخاب کنید یا اینجا رها کنید</span>
+              {% if form.permission_document.errors %}<span class="error">{{ form.permission_document.errors.0 }}</span>{% endif %}
+            </label>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top:16px;">
+          <label class="field full" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" name="is_original" value="True" {% if form.is_original.value %}checked{% endif %} required>
+            <span>تأیید می‌کنم این اثر اصیل است و کپی‌برداری نشده *</span>
+            {% if form.is_original.errors %}<span class="error">{{ form.is_original.errors.0 }}</span>{% endif %}
+          </label>
+          <label class="field full" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" name="terms_accepted" value="True" {% if form.terms_accepted.value %}checked{% endif %} required>
+            <span>قوانین انتشار را خوانده‌ام و می‌پذیرم *</span>
+            {% if form.terms_accepted.errors %}<span class="error">{{ form.terms_accepted.errors.0 }}</span>{% endif %}
+          </label>
+        </div>
+
+        <div class="field-row" style="margin-top:20px;">
+          <button class="btn btn-primary" type="submit" style="width:100%;padding:16px;font-size:16px;">ارسال اثر برای بررسی ←</button>
+        </div>
+        
+        {% if messages %}
+        <div class="form-msg" role="status">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </form>
+    </section>
+  </section>
+
+  <aside class="sidebar">
+    <section class="side-box">
+      <div class="side-heading"><h2>راهنمای ارسال</h2><span>+</span></div>
+      <ul class="list-clean" style="font-size:13px;line-height:1.8;">
+        <li>فایل‌های صوتی باید فرمت MP3، M4A، WAV، OGG یا FLAC باشند</li>
+        <li>حداکثر حجم فایل صوتی: ۸۰ مگابایت</li>
+        <li>کاور باید فرمت JPG، PNG، WebP یا SVG باشد</li>
+        <li>حداکثر حجم کاور: ۸ مگابایت</li>
+        <li>هر دو کیفیت ۱۲۸ و ۳۲۰ توصیه می‌شود</li>
+        <li>متن ترانه اختیاری اما توصیه شده</li>
+        <li>بازه زمانی بررسی: ۳ تا ۷ روز کاری</li>
+      </ul>
+    </section>
+    <section class="side-box">
+      <div class="side-heading"><h2>قوانین انتشار</h2><span>+</span></div>
+      <ul class="list-clean" style="font-size:13px;line-height:1.8;">
+        <li>اثر باید اصیل و مالکیت شما باشد</li>
+        <li>مجوز انتشار معتبر الزامی است</li>
+        <li>محتوای توهین‌آمیز یا غیرقانونی مجاز نیست</li>
+        <li>آوا موزیک حق حذف هر محتوایی را دارد</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+{% endblock %}

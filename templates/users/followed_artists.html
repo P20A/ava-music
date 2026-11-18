@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}هنرمندانی که دنبال می‌کنم | {{ site.site_name }}{% endblock %}
+
+{% block page_name %}followed_artists{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>دنبال‌کنندگان</b></nav>
+
+<div class="wrap page-layout">
+  <section class="main-column">
+    <section class="panel">
+      <div class="panel-head"><h2>هنرمندانی که دنبال می‌کنم</h2><span>{{ followed.count }} هنرمند</span></div>
+      
+      {% if followed %}
+      <div class="artist-list">
+        {% for follow in followed %}
+        <a href="{{ follow.artist.get_absolute_url }}">
+          {% if follow.artist.profile_image %}
+            <img src="{{ follow.artist.profile_image.url }}" alt="" loading="lazy">
+          {% else %}
+            <img src="{% static 'images/artist-1.svg' %}" alt="" loading="lazy">
+          {% endif %}
+          <span><b>{{ follow.artist.name }}</b><small>{{ follow.artist.songs.first.categories.first.name|default:"موسیقی" }}</small></span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="empty-state">هنوز هنرمندی را دنبال نمی‌کنید.</p>
+      {% endif %}
+    </section>
+  </section>
+
+  <aside class="sidebar">
+    <section class="side-box">
+      <div class="side-heading"><h2>منوی کاربری</h2></div>
+      <ul class="list-clean" style="display:flex;flex-direction:column;gap:8px;">
+        <li><a href="{% url 'users:profile' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">پروفایل <span>👤</span></a></li>
+        <li><a href="{% url 'users:favorites' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">آهنگ‌های پسندیده <span>♥</span></a></li>
+        <li><a href="{% url 'users:history' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">تاریخچه پخش <span>🕐</span></a></li>
+        <li><a href="{% url 'users:followed_artists' %}" class="btn btn-primary" style="width:100%;justify-content:space-between;">هنرمندانی که دنبال می‌کنم <span>✦</span></a></li>
+        <li><a href="{% url 'users:logout' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;color:var(--destructive);">خروج <span>←</span></a></li>
+      </ul>
+    </section>
+  </aside>
+</div>
+{% endblock %}

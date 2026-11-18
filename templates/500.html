@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}خطای سرور | {{ site.site_name }}{% endblock %}
+
+{% block page_name %}500{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <h1>۵۰۰</h1>
+  <h2>خطای داخلی سرور</h2>
+  <p>متأسفیم، خطایی در سرور رخ داده است. تیم فنی ما از این مشکل مطلع شده و در حال رفع آن است.</p>
+  <div class="error-actions">
+    <a href="{% url 'core:home' %}" class="btn btn-primary">بازگشت به خانه</a>
+    <a href="{% url 'core:contact' %}" class="btn btn-ghost">تماس با ما</a>
+  </div>
+</div>
+{% endblock %}

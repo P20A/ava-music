@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static i18n persian_filters %}
+
+{% block title %}آلبوم‌های {{ artist.name }} | {{ site.site_name }}{% endblock %}
+{% block meta_description %}فهرست آلبوم‌های {{ artist.name }} در {{ site.site_name }}.{% endblock %}
+{% block page_name %}artist-albums{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb" aria-label="مسیر">
+  <a href="{% url 'core:home' %}">خانه</a>
+  <a href="{% url 'artists:list' %}">هنرمندان</a>
+  <a href="{{ artist.get_absolute_url }}">{{ artist.name }}</a>
+  <span>آلبوم‌ها</span>
+</nav>
+
+<section class="content-section">
+  <div class="section-title">
+    <div><span>آرشیو</span><h2>آلبوم‌های {{ artist.name }}</h2></div>
+    <a href="{{ artist.get_absolute_url }}">پروفایل هنرمند ←</a>
+  </div>
+
+  <div class="album-grid">
+    {% include "includes/album_card.html" with items=albums %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+    <a class="btn btn-soft btn-sm" href="?page={{ page_obj.previous_page_number }}">قبلی</a>
+    {% endif %}
+    <span>صفحه {{ page_obj.number|fa_number }} از {{ page_obj.paginator.num_pages|fa_number }}</span>
+    {% if page_obj.has_next %}
+    <a class="btn btn-soft btn-sm" href="?page={{ page_obj.next_page_number }}">بعدی</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

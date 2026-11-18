@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}ورود | {{ site.site_name }}{% endblock %}
+
+{% block page_name %}login{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>ورود</b></nav>
+
+<div class="wrap" style="max-width:420px;">
+  <section class="panel" style="margin-top:40px;">
+    <div class="panel-head" style="text-align:center;"><h2>ورود به حساب کاربری</h2></div>
+    
+    <form method="post" action="{% url 'users:login' %}" class="comment-form" data-demo-form>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.GET.next|default:'{% url \"users:profile\" %}' }}">
+      
+      <div class="form-grid">
+        <label class="field full">
+          <span>نام کاربری یا ایمیل</span>
+          <input class="input" type="text" name="username" placeholder="نام کاربری یا ایمیل" value="{{ form.username.value|default:'' }}" required autofocus>
+          {% if form.username.errors %}<span class="error">{{ form.username.errors.0 }}</span>{% endif %}
+        </label>
+        <label class="field full">
+          <span>رمز عبور</span>
+          <input class="input" type="password" name="password" placeholder="رمز عبور" required>
+          {% if form.password.errors %}<span class="error">{{ form.password.errors.0 }}</span>{% endif %}
+        </label>
+      </div>
+      
+      <div class="field-row" style="justify-content:space-between;align-items:center;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="remember" value="True"> به یادم بمان
+        </label>
+        <a href="{% url 'users:password_reset' %}" style="font-size:13px;">رمز عبور را فراموش کرده‌ام</a>
+      </div>
+      
+      <div class="field-row">
+        <button class="btn btn-primary" type="submit" style="width:100%;padding:14px;">ورود</button>
+      </div>
+      
+      {% if messages %}
+      <div class="form-msg" role="status">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </form>
+    
+    <div style="text-align:center;margin-top:24px;padding-top:24px;border-top:1px solid var(--line);">
+      <p style="color:var(--muted);">حساب کاربری ندارید؟ <a href="{% url 'users:register' %}">ثبت‌نام رایگان</a></p>
+    </div>
+  </section>
+</div>
+{% endblock %}

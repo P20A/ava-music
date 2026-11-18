@@ -1,0 +1,17 @@
+{% load static %}
+{% for album in items %}
+<a class="album-card" href="{{ album.get_absolute_url }}">
+  <span class="cover-wrap">
+    {% if album.cover %}
+      <img src="{{ album.cover.url }}" alt="{{ album.title }}" loading="lazy">
+    {% else %}
+      <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+    {% endif %}
+    <span class="cover-play">▶</span>
+  </span>
+  <b>{{ album.title }}</b>
+  <small>{% if album.artists.first %}{{ album.artists.first.name }}{% else %}مجموعه{% endif %} · {{ album.track_total }} قطعه</small>
+</a>
+{% empty %}
+<p class="empty-state">هیچ آلبومی برای نمایش وجود ندارد.</p>
+{% endfor %}

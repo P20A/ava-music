@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}آلبوم‌ها و پلی‌لیست‌ها | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}آرشیو کامل آلبوم‌ها و پلی‌لیست‌های موسیقی در {{ site.site_name }}؛ با کاور، فهرست قطعات و اطلاعات انتشار.{% endblock %}
+
+{% block page_name %}albums{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آلبوم‌ها</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">ALBUMS · آلبوم‌های آوا</span>
+    <h1>آلبوم‌ها و پلی‌لیست‌ها</h1>
+    <p>مجموعه‌های کامل موسیقی، آلبوم‌های رسمی، ای‌پی‌ها و پلی‌لیست‌های منتخب برای شنیدن مداوم.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>{{ albums.paginator.count|default:0 }}</b><small>آلبوم</small></div>
+    <div class="hero-stat"><b>{{ playlists.paginator.count|default:0 }}</b><small>پلی‌لیست</small></div>
+  </div>
+</section>
+
+<div class="toolbar">
+  <div class="chip-row">
+    <button class="chip {% if not current_type %}active{% endif %}" data-filter="all">همه</button>
+    <button class="chip {% if current_type == 'album' %}active{% endif %}" data-filter="album">آلبوم رسمی</button>
+    <button class="chip {% if current_type == 'ep' %}active{% endif %}" data-filter="ep">ای‌پی</button>
+    <button class="chip {% if current_type == 'single' %}active{% endif %}" data-filter="single">تک‌آهنگ</button>
+    <button class="chip {% if current_type == 'compilation' %}active{% endif %}" data-filter="compilation">گردآوری</button>
+    <button class="chip {% if current_type == 'soundtrack' %}active{% endif %}" data-filter="soundtrack">موسیقی متن</button>
+    <button class="chip {% if current_type == 'live' %}active{% endif %}" data-filter="live">اجرای زنده</button>
+  </div>
+  <span class="spacer"></span>
+  <select class="field-select" onchange="window.location.href=this.value">
+    <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>جدیدترین</option>
+    <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>پربازدیدترین</option>
+    <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
+  </select>
+  <div class="view-toggle" role="group" aria-label="حالت نمایش">
+    <button class="active" data-view="grid" aria-label="نمایش شبکه‌ای">▦</button>
+    <button data-view="list" aria-label="نمایش فهرستی">☰</button>
+  </div>
+</div>
+
+<div class="album-grid" id="albumGrid">
+  {% for album in albums %}
+  <a class="album-card" href="{{ album.get_absolute_url }}">
+    <span class="cover-wrap">
+      {% if album.cover %}
+        <img src="{{ album.cover.url }}" alt="{{ album.title }}" loading="lazy">
+      {% else %}
+        <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+      {% endif %}
+      <span class="cover-play">▶</span>
+    </span>
+    <b>{{ album.title }}</b>
+    <small>{% if album.artists.first %}{{ album.artists.first.name }}{% else %}مجموعه{% endif %} · {{ album.track_total }} قطعه · {{ album.release_date|fa_date_short }}</small>
+  </a>
+  {% empty %}
+  <p class="empty-state">هیچ آلبومی یافت نشد.</p>
+  {% endfor %}
+</div>
+
+<div class="post-list" id="compactList" hidden>
+  {% for album in albums %}
+  <article class="music-post">
+    <a class="post-cover" href="{{ album.get_absolute_url }}">
+      {% if album.cover %}
+        <img src="{{ album.cover.url }}" alt="" loading="lazy">
+      {% else %}
+        <img src="{% static 'images/cover-1.svg' %}" alt="">
+      {% endif %}
+      <span class="cover-play">▶</span>
+    </a>
+    <div class="post-body">
+      <div class="post-meta"><span class="tag">{{ album.get_album_type_display }}</span><time>{{ album.release_date|fa_date }}</time><span>{{ album.track_total }} قطعه</span></div>
+      <h3><a href="{{ album.get_absolute_url }}">{{ album.title }}</a></h3>
+      <p>{{ album.description|truncatewords:20 }}</p>
+      <div class="post-bottom"><span>هنرمند: <b>{% if album.artists.first %}{{ album.artists.first.name }}{% else %}مجموعه{% endif %}</b></span><a href="{{ album.get_absolute_url }}" class="read-more">مشاهده ←</a></div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if albums.has_previous %}
+  <a href="?page={{ albums.previous_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+  {% endif %}
+  {% for num in albums.paginator.page_range %}
+    {% if albums.number == num %}
+    <a class="page-active" href="#">{{ num }}</a>
+    {% elif num > albums.number|add:-3 and num < albums.number|add:3 %}
+    <a href="?page={{ num }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if albums.has_next %}
+  <a href="?page={{ albums.next_page_number }}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+  {% endif %}
+</div>
+{% endblock %}

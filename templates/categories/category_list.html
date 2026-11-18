@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static i18n humanize %}
+
+{% block title %}دسته‌بندی‌ها | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}فهرست تمام سبک‌ها، دسته‌بندی‌ها، حال‌وهواها و زبان‌های موسیقی در {{ site.site_name }}.{% endblock %}
+
+{% block page_name %}categories{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>دسته‌بندی‌ها</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">CATEGORIES · دسته‌بندی‌های آوا</span>
+    <h1>سبک‌ها و دسته‌بندی‌ها</h1>
+    <p>موسیقی را بر اساس سبک، حال‌وهوا یا زبان کشف کنید.</p>
+  </div>
+</section>
+
+<div class="category-grid">
+  {% for category in categories %}
+  <a href="{{ category.get_absolute_url }}" class="category-card" style="display:block;text-decoration:none;color:inherit;">
+    <div class="category-card-inner" style="padding:24px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);text-align:center;transition:var(--transition);">
+      {% if category.image %}
+        <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width:80px;height:80px;object-fit:cover;border-radius:50%;margin-bottom:12px;">
+      {% else %}
+        <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px;">{{ category.icon|default:"♪" }}</div>
+      {% endif %}
+      <b style="font-size:16px;display:block;">{{ category.name }}</b>
+      <small style="display:block;color:var(--muted);margin-top:6px;">{{ category.song_count }} آهنگ</small>
+      {% if category.description %}
+      <p style="margin-top:12px;font-size:13px;color:var(--muted);">{{ category.description|truncatewords:15 }}</p>
+      {% endif %}
+    </div>
+  </a>
+  {% empty %}
+  <p class="empty-state">هیچ دسته‌بندی یافت نشد.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}خوانندگان | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}فهرست خوانندگان و هنرمندان موسیقی ایرانی در {{ site.site_name }}؛ پروفایل، آهنگ‌ها و آلبوم‌های هر خواننده.{% endblock %}
+
+{% block page_name %}artists{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>خوانندگان</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">ARTISTS · هنرمندان آوا</span>
+    <h1>خوانندگان و هنرمندان</h1>
+    <p>پروفایل خوانندگان محبوب و تازه‌کار، همراه با آهنگ‌ها، آلبوم‌ها و آمار پخش. هنرمند موردعلاقه‌ات را پیدا کن و دنبال کن.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>{{ artists.paginator.count|default:0 }}</b><small>خواننده فعال</small></div>
+    <div class="hero-stat"><b>{{ total_albums|default:0 }}</b><small>آلبوم</small></div>
+    <div class="hero-stat"><b>{{ total_songs|default:0 }}</b><small>آهنگ</small></div>
+  </div>
+</section>
+
+<div class="toolbar" data-alpha-group data-alpha-target="#artistGrid">
+  <div class="alpha-row" aria-label="فیلتر حروف الفبا">
+    <button class="{% if current_letter == 'all' or not current_letter %}active{% endif %}" data-letter="all">همه</button>
+    <button data-letter="آ">{% if current_letter == 'آ' %}active{% endif %}</button>
+    <button data-letter="ا">{% if current_letter == 'ا' %}active{% endif %}</button>
+    <button data-letter="ب">{% if current_letter == 'ب' %}active{% endif %}</button>
+    <button data-letter="پ">{% if current_letter == 'پ' %}active{% endif %}</button>
+    <button data-letter="ت">{% if current_letter == 'ت' %}active{% endif %}</button>
+    <button data-letter="ث">{% if current_letter == 'ث' %}active{% endif %}</button>
+    <button data-letter="ج">{% if current_letter == 'ج' %}active{% endif %}</button>
+    <button data-letter="چ">{% if current_letter == 'چ' %}active{% endif %}</button>
+    <button data-letter="ح">{% if current_letter == 'ح' %}active{% endif %}</button>
+    <button data-letter="خ">{% if current_letter == 'خ' %}active{% endif %}</button>
+    <button data-letter="د">{% if current_letter == 'د' %}active{% endif %}</button>
+    <button data-letter="ذ">{% if current_letter == 'ذ' %}active{% endif %}</button>
+    <button data-letter="ر">{% if current_letter == 'ر' %}active{% endif %}</button>
+    <button data-letter="ز">{% if current_letter == 'ز' %}active{% endif %}</button>
+    <button data-letter="ژ">{% if current_letter == 'ژ' %}active{% endif %}</button>
+    <button data-letter="س">{% if current_letter == 'س' %}active{% endif %}</button>
+    <button data-letter="ش">{% if current_letter == 'ش' %}active{% endif %}</button>
+    <button data-letter="ص">{% if current_letter == 'ص' %}active{% endif %}</button>
+    <button data-letter="ض">{% if current_letter == 'ض' %}active{% endif %}</button>
+    <button data-letter="ط">{% if current_letter == 'ط' %}active{% endif %}</button>
+    <button data-letter="ظ">{% if current_letter == 'ظ' %}active{% endif %}</button>
+    <button data-letter="ع">{% if current_letter == 'ع' %}active{% endif %}</button>
+    <button data-letter="غ">{% if current_letter == 'غ' %}active{% endif %}</button>
+    <button data-letter="ف">{% if current_letter == 'ف' %}active{% endif %}</button>
+    <button data-letter="ق">{% if current_letter == 'ق' %}active{% endif %}</button>
+    <button data-letter="ک">{% if current_letter == 'ک' %}active{% endif %}</button>
+    <button data-letter="گ">{% if current_letter == 'گ' %}active{% endif %}</button>
+    <button data-letter="ل">{% if current_letter == 'ل' %}active{% endif %}</button>
+    <button data-letter="م">{% if current_letter == 'م' %}active{% endif %}</button>
+    <button data-letter="ن">{% if current_letter == 'ن' %}active{% endif %}</button>
+    <button data-letter="و">{% if current_letter == 'و' %}active{% endif %}</button>
+    <button data-letter="ه">{% if current_letter == 'ه' %}active{% endif %}</button>
+    <button data-letter="ی">{% if current_letter == 'ی' %}active{% endif %}</button>
+  </div>
+  <span class="spacer"></span>
+  <select class="field-select" aria-label="مرتب‌سازی خوانندگان" onchange="window.location.href=this.value">
+    <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>محبوب‌ترین</option>
+    <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>تازه‌ترین</option>
+    <option value="?sort=songs"{% if current_sort == 'songs' %} selected{% endif %}>بیشترین آهنگ</option>
+  </select>
+</div>
+
+<div class="artist-grid" id="artistGrid">
+  {% for artist in artists %}
+  <article class="artist-card" data-name="{{ artist.name }}" data-tags="{% for song in artist.songs.all|slice:":3" %}{{ song.categories.first.name }} {% endfor %}">
+    <a href="{{ artist.get_absolute_url }}">
+      {% if artist.profile_image %}
+        <img src="{{ artist.profile_image.url }}" alt="{{ artist.name }}" loading="lazy">
+      {% else %}
+        <img src="{% static 'images/artist-1.svg' %}" alt="" loading="lazy">
+      {% endif %}
+    </a>
+    <b><a href="{{ artist.get_absolute_url }}">{{ artist.name }}</a></b>
+    <small>{{ artist.songs.first.categories.first.name|default:"موسیقی" }} · {{ artist.song_count }} آهنگ</small>
+    <span class="artist-plays">♪ {{ artist.total_plays|fa_number|default:"0" }} پخش</span>
+    <button class="btn btn-ghost btn-sm follow-btn" data-follow data-artist="{{ artist.slug }}">+ دنبال کردن</button>
+  </article>
+  {% empty %}
+  <p class="empty-state">هیچ هنرمندی یافت نشد.</p>
+  {% endfor %}
+</div>
+
+<div class="empty-state" data-alpha-empty style="display:none;"><b>خواننده‌ای با این حرف پیدا نشد</b>حرف دیگری را انتخاب کنید یا گزینه «همه» را بزنید.</div>
+
+<div class="pagination">
+  {% if artists.has_previous %}
+  <a href="?page={{ artists.previous_page_number }}{% if current_letter %}&letter={{ current_letter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+  {% endif %}
+  {% for num in artists.paginator.page_range %}
+    {% if artists.number == num %}
+    <a class="page-active" href="#">{{ num }}</a>
+    {% elif num > artists.number|add:-3 and num < artists.number|add:3 %}
+    <a href="?page={{ num }}{% if current_letter %}&letter={{ current_letter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if artists.has_next %}
+  <a href="?page={{ artists.next_page_number }}{% if current_letter %}&letter={{ current_letter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+  {% endif %}
+</div>
+
+<section class="ad-banner">
+  <div><b>هنرمندی و می‌خواهی اثرت را منتشر کنی؟</b><small>آهنگ، آلبوم یا موزیک‌ویدیوی خود را برای انتشار در آوا ارسال کن.</small></div>
+  <a class="btn btn-sm" href="{% url 'submissions:create' %}">ارسال اثر ←</a>
+</section>
+{% endblock %}

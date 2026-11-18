@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}{{ artist.name }} | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}{% if artist.seo_description %}{{ artist.seo_description }}{% elif artist.description %}{{ artist.description }}{% else %}پروفایل {{ artist.name }}، خواننده {{ artist.songs.first.categories.first.name|default:'موسیقی' }} ایرانی؛ آهنگ‌ها، آلبوم‌ها، بیوگرافی و آمار پخش در {{ site.site_name }}.{% endif %}{% endblock %}
+
+{% block og_title %}{{ artist.name }}{% endblock %}
+{% block og_description %}{{ artist.seo_description|default:artist.description }}{% endblock %}
+{% block og_image %}{{ artist.cover_image.url|default:artist.profile_image.url|default:site.share_image.url }}{% endblock %}
+
+{% block page_name %}artist{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'artists:list' %}">خوانندگان</a><i>›</i><b>{{ artist.name }}</b></nav>
+
+<section class="artist-hero">
+  <div class="cover-wrap">
+    {% if artist.cover_image %}
+      <img src="{{ artist.cover_image.url }}" alt="کاور صفحه {{ artist.name }}">
+    {% else %}
+      <img src="{% static 'images/cover-1.svg' %}" alt="">
+    {% endif %}
+  </div>
+  <div class="artist-hero-body">
+    <img class="artist-avatar" src="{% if artist.profile_image %}{{ artist.profile_image.url }}{% else %}{% static 'images/artist-1.svg' %}{% endif %}" alt="{{ artist.name }}">
+    <div class="artist-hero-info">
+      <h1>{{ artist.name }}</h1>
+      <div class="meta-row">
+        {% if artist.songs.first.categories.first %}
+        <span>{{ artist.songs.first.categories.first.name }}</span><span class="dot">•</span>
+        {% endif %}
+        {% if artist.active_since %}
+        <span>فعال از {{ artist.active_since }}</span><span class="dot">•</span>
+        {% endif %}
+        {% if artist.city %}
+        <span>{{ artist.city }}</span>
+        {% endif %}
+      </div>
+      <div class="artist-actions">
+        <button class="btn btn-primary" data-play-album data-album-artist="{{ artist.name }}">▶ پخش منتخب</button>
+          <button class="btn btn-ghost" data-follow data-artist="{{ artist.slug }}" data-follow-url="{% url 'artists:follow' artist.slug %}">+ دنبال کردن</button>
+        <button class="btn btn-soft" data-share="copy" aria-label="کپی لینک صفحه">⧉ اشتراک صفحه</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="stat-row">
+  <div class="stat"><b>{{ artist.song_count }}</b><small>آهنگ منتشرشده</small></div>
+  <div class="stat"><b>{{ artist.album_count }}</b><small>آلبوم</small></div>
+  <div class="stat"><b>{{ artist.total_plays|fa_number|default:"0" }}</b><small>کل پخش‌ها</small></div>
+  <div class="stat"><b>{{ artist.follower_count|fa_number }}</b><small>دنبال‌کننده</small></div>
+</div>
+
+<div class="tabs" data-tabs role="tablist" aria-label="بخش‌های صفحه خواننده">
+  <button class="active" data-tab="songs" role="tab" aria-selected="true">آهنگ‌ها</button>
+  <button data-tab="albums" role="tab" aria-selected="false">آلبوم‌ها</button>
+  <button data-tab="bio" role="tab" aria-selected="false">درباره</button>
+</div>
+
+<div class="tab-panel active" data-panel="songs">
+  <div class="post-list">
+    {% for song in songs %}
+    <article class="music-post" data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}">
+      <a class="post-cover" href="{{ song.get_absolute_url }}">
+        {% if song.cover_image %}
+          <img src="{{ song.cover_image.url }}" alt="کاور {{ song.title }}" loading="lazy">
+        {% else %}
+          <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+        {% endif %}
+        <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+      </a>
+      <div class="post-body">
+        <div class="post-meta">
+          <span class="tag">{{ song.album_tracks.first.album.album_type|default:"تک‌آهنگ" }}</span>
+          <time>{{ song.release_date|fa_date }}</time>
+          <span>{{ song.duration|fa_duration }}</span>
+        </div>
+        <h3><a href="{{ song.get_absolute_url }}">{{ song.title }}</a></h3>
+        <p>{{ song.short_description }}</p>
+        <div class="post-bottom"><span><b>{{ song.view_count|fa_number }}</b> بازدید</span><a href="{{ song.get_absolute_url }}" class="read-more">پخش و دانلود <b>←</b></a></div>
+      </div>
+    </article>
+    {% empty %}
+    <p class="empty-state">هیچ آهنگی برای این هنرمند یافت نشد.</p>
+    {% endfor %}
+  </div>
+  <div class="section-cta"><a class="btn btn-ghost" href="{% url 'artists:songs' artist.slug %}">مشاهده همه آهنگ‌های {{ artist.name }} ←</a></div>
+</div>
+
+<div class="tab-panel" data-panel="albums">
+  <div class="album-grid">
+    {% for album in albums %}
+    <a class="album-card" href="{{ album.get_absolute_url }}">
+      <span class="cover-wrap">
+        {% if album.cover %}
+          <img src="{{ album.cover.url }}" alt="" loading="lazy">
+        {% else %}
+          <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+        {% endif %}
+        <span class="cover-play">▶</span>
+      </span>
+      <b>{{ album.title }}</b><small>{{ album.release_date|fa_date_short }} · {{ album.track_total }} قطعه</small>
+    </a>
+    {% empty %}
+    <p class="empty-state">هیچ آلبومی برای این هنرمند یافت نشد.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="tab-panel" data-panel="bio">
+  <div class="panel">
+    <div class="panel-head"><h2>بیوگرافی</h2><span>{{ artist.name }}</span></div>
+    {% if artist.biography %}
+    <p>{{ artist.biography|linebreaksbr }}</p>
+    {% else %}
+    <p>بیوگرافی برای این هنرمند ثبت نشده است.</p>
+    {% endif %}
+    <div class="info-grid" style="margin-top:14px">
+      <div class="info-item"><span>نام هنری</span><b>{{ artist.name }}</b></div>
+      <div class="info-item"><span>زمینه فعالیت</span><b>{{ artist.songs.first.categories.first.name|default:"موسیقی" }}</b></div>
+      <div class="info-item"><span>شروع فعالیت</span><b>{{ artist.active_since|default:"—" }}</b></div>
+      <div class="info-item"><span>شهر</span><b>{{ artist.city|default:"—" }}</b></div>
+      <div class="info-item"><span>ناشر</span><b>{{ site.site_name }}</b></div>
+      <div class="info-item"><span>زبان</span><b>{{ artist.songs.first.get_language_display|default:"فارسی" }}</b></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.avaArtistData = {
+  slug: "{{ artist.slug }}",
+  name: "{{ artist.name|escapejs }}",
+  songCount: {{ artist.song_count }},
+  isFollowing: {% if is_following %}true{% else %}false{% endif %}
+};
+</script>
+{% endblock %}

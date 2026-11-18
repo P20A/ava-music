@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}آرشیو آهنگ‌ها | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}آرشیو کامل آهنگ‌های جدید ایرانی، ریمیکس، آهنگ ترکی و کردی با لینک دانلود و پخش آنلاین در {{ site.site_name }}.{% endblock %}
+
+{% block page_name %}archive{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آرشیو آهنگ‌ها</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">AVA ARCHIVE · آرشیو انتشارها</span>
+    <h1>آرشیو آهنگ‌ها</h1>
+    <p>همه انتشارهای تازه و محبوب، مرتب‌شده بر اساس تاریخ. با فیلتر سبک و مرتب‌سازی دلخواه، سریع‌تر به آهنگ موردنظرت برس.</p>
+    <div class="toolbar" style="margin-bottom:0">
+      <a class="btn btn-primary btn-sm" href="{% url 'core:archive' %}">آهنگ جدید</a>
+      <a class="btn btn-ghost btn-sm" href="{% url 'albums:list' %}">آلبوم‌ها</a>
+      <a class="btn btn-ghost btn-sm" href="{% url 'artists:list' %}">خوانندگان</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>{{ songs.paginator.count|default:0 }}</b><small>آهنگ منتشرشده</small></div>
+    <div class="hero-stat"><b>{{ categories.count }}</b><small>دسته‌بندی</small></div>
+    <div class="hero-stat"><b>{{ artists.count|default:0 }}</b><small>خواننده</small></div>
+  </div>
+</section>
+
+<div class="wrap page-layout">
+  <section class="main-column">
+    <div class="toolbar" data-filter-group data-filter-target="#archiveView" data-empty="#archiveEmpty">
+      <div class="chip-row" id="new">
+        <button class="chip {% if not current_category %}active{% endif %}" data-filter="all">همه</button>
+        {% for cat in categories %}
+        <button class="chip {% if current_category == cat.slug %}active{% endif %}" data-filter="{{ cat.slug }}">{{ cat.name }}</button>
+        {% endfor %}
+      </div>
+      <span class="spacer"></span>
+      <select class="field-select" data-sort data-sort-target="#songGrid" aria-label="مرتب‌سازی" onchange="window.location.href=this.value">
+        <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>جدیدترین</option>
+        <option value="?sort=views"{% if current_sort == 'views' %} selected{% endif %}>پربازدیدترین</option>
+        <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>بیشترین پخش</option>
+        <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
+      </select>
+      <div class="view-toggle" role="group" aria-label="حالت نمایش">
+        <button class="active" data-view="grid" aria-label="نمایش شبکه‌ای">▦</button>
+        <button data-view="list" aria-label="نمایش فهرستی">☰</button>
+      </div>
+    </div>
+
+    <div id="archiveView" data-view-scope>
+      <div class="song-grid" id="songGrid">
+        {% for song in songs %}
+        <article class="song-card" 
+          data-tags="{% for cat in song.categories.all %}{{ cat.name }} {% endfor %}"
+          data-date="{{ song.published_at|date:'Y-m-d' }}"
+          data-views="{{ song.view_count }}"
+          data-title="{{ song.title }}"
+          data-song="{{ song.title }}"
+          data-artist="{{ song.primary_artist.name }}">
+          <a class="song-thumb" href="{{ song.get_absolute_url }}">
+            {% if song.cover_image %}
+              <img src="{{ song.cover_image.url }}" alt="کاور {{ song.title }}" loading="lazy">
+            {% else %}
+              <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+            {% endif %}
+            <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+          </a>
+          <div class="song-card-body">
+            <div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date_short }}</time></div>
+            <h3><a href="{{ song.get_absolute_url }}">{{ song.title }} — {{ song.primary_artist.name }}</a></h3>
+            <p>{{ song.short_description }}</p>
+            <div class="card-foot"><span>خواننده: <b>{{ song.primary_artist.name }}</b></span><a class="read-more" href="{{ song.get_absolute_url }}">دانلود <b>←</b></a></div>
+          </div>
+        </article>
+        {% empty %}
+        <p class="empty-state">هیچ آهنگی یافت نشد.</p>
+        {% endfor %}
+      </div>
+
+      <div class="post-list" id="compactList" hidden>
+        {% for song in songs %}
+        <article class="music-post" data-tags="{% for cat in song.categories.all %}{{ cat.name }} {% endfor %}" data-date="{{ song.published_at|date:'Y-m-d' }}" data-views="{{ song.view_count }}" data-title="{{ song.title }}" data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}">
+          <a class="post-cover" href="{{ song.get_absolute_url }}">
+            {% if song.cover_image %}
+              <img src="{{ song.cover_image.url }}" alt="" loading="lazy">
+            {% else %}
+              <img src="{% static 'images/cover-1.svg' %}" alt="">
+            {% endif %}
+            <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+          </a>
+          <div class="post-body"><div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date }}</time><span>{{ song.view_count|fa_number }} بازدید</span></div><h3><a href="{{ song.get_absolute_url }}">{{ song.title }} — {{ song.primary_artist.name }}</a></h3><p>{{ song.short_description }}</p><div class="post-bottom"><span>خواننده: <b>{{ song.primary_artist.name }}</b></span><a href="{{ song.get_absolute_url }}" class="read-more">ادامه و دانلود <b>←</b></a></div></div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="empty-state" id="archiveEmpty"><b>نتیجه‌ای پیدا نشد</b>فیلتر دیگری را امتحان کنید یا همه آهنگ‌ها را ببینید.</div>
+
+    <div class="pagination">
+      {% if songs.has_previous %}
+      <a href="?page={{ songs.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+      {% endif %}
+      {% for num in songs.paginator.page_range %}
+        {% if songs.number == num %}
+        <a class="page-active" href="#">{{ num }}</a>
+        {% elif num > songs.number|add:-3 and num < songs.number|add:3 %}
+        <a href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if songs.has_next %}
+      <a href="?page={{ songs.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    <section class="side-box">
+      <div class="side-heading"><h2>دسته‌بندی موسیقی</h2><span>+</span></div>
+      <div class="category-links">
+        {% for cat in categories %}
+        <a href="{% url 'core:archive' %}?category={{ cat.slug }}"><span>{{ cat.icon|default:"♪" }}</span> {{ cat.name }} <b>{{ cat.song_count }}</b></a>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="side-box" id="popular">
+      <div class="side-heading"><h2>پربازدیدترین‌ها</h2><a href="{% url 'core:archive' %}?sort=views">این هفته</a></div>
+      <ol class="popular-list">
+        {% for song in popular_songs|slice:":5" %}
+        <li><span class="rank">{{ forloop.counter }}</span><div><b>{{ song.title }}</b><small>{{ song.primary_artist.name }}</small></div><span class="views">{{ song.view_count|fa_number }}</span></li>
+        {% endfor %}
+      </ol>
+    </section>
+    <section class="side-box">
+      <div class="side-heading"><h2>خوانندگان محبوب</h2><a href="{% url 'artists:list' %}">همه</a></div>
+      <div class="artist-list">
+        {% for artist in artists|slice:":4" %}
+        <a href="{{ artist.get_absolute_url }}">
+          {% if artist.profile_image %}
+            <img src="{{ artist.profile_image.url }}" alt="" loading="lazy">
+          {% else %}
+            <img src="{% static 'images/artist-1.svg' %}" alt="" loading="lazy">
+          {% endif %}
+          <span><b>{{ artist.name }}</b><small>{{ artist.song_count }} آهنگ</small></span>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="side-promo"><span>AVA MUSIC</span><b>موسیقی خوب<br>همیشه همراهته.</b><small>کشف کن، گوش بده، لذت ببر.</small></section>
+  </aside>
+</div>
+{% endblock %}

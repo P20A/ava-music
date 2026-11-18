@@ -1,0 +1,16 @@
+{% load i18n %}
+{% if ad %}
+<div class="ad-wrapper" data-placement="{{ placement }}">
+  {% if ad.image %}
+    <a href="{{ ad.target_url }}" {% if ad.open_new_tab %}target="_blank" rel="noopener"{% endif %}>
+      <img src="{{ ad.image.url }}" alt="{{ ad.title }}" loading="lazy">
+    </a>
+  {% elif ad.html_code %}
+    {{ ad.html_code|safe }}
+  {% else %}
+    <a href="{{ ad.target_url }}" {% if ad.open_new_tab %}target="_blank" rel="noopener"{% endif %}>
+      <div class="ad-text">{{ ad.title }}</div>
+    </a>
+  {% endif %}
+</div>
+{% endif %}

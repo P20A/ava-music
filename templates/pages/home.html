@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static i18n humanize %}
+
+{% block title %}{{ site.site_name }} - {% if site.site_tagline %}{{ site.site_tagline }}{% endif %}{% endblock %}
+
+{% block meta_description %}{{ site.site_description|default:"آرشیو موسیقی فارسی - تازه‌ترین آهنگ‌ها، آلبوم‌ها و ریمیکس‌ها با لینک دانلود و پخش آنلاین" }}{% endblock %}
+
+{% block page_name %}home{% endblock %}
+
+{% block content %}
+<div class="breaking">
+  <b>پیشنهاد آوا</b>
+  <div class="ticker">
+    <span>جدیدترین انتشارهای موسیقی را از دست ندهید</span>
+    <a href="#new">مشاهده فهرست امروز ←</a>
+  </div>
+</div>
+
+{% if featured_song %}
+<section class="featured" id="special">
+  <div class="featured-image">
+    {% if featured_song.cover_image %}
+      <img src="{{ featured_song.cover_image.url }}" alt="کاور {{ featured_song.title }}">
+    {% else %}
+      <img src="{% static 'images/cover-1.svg' %}" alt="کاور پیش‌فرض">
+    {% endif %}
+    <span class="featured-label">انتخاب سردبیر</span>
+  </div>
+  <div class="featured-text">
+    <span class="eyebrow">ویژه امروز · انتشار تازه</span>
+    <h1>{{ featured_song.title }}</h1>
+    <p>{{ featured_song.short_description|default:"از تازه‌ترین تک‌آهنگ‌ها تا آلبوم‌ها و ریمیکس‌های محبوب؛ همه‌چیز در یک آرشیو مرتب و همیشه به‌روز." }}</p>
+    <a class="solid-link" href="{{ featured_song.get_absolute_url }}">مشاهده و دانلود <b>←</b></a>
+  </div>
+</section>
+{% endif %}
+
+{% for section_data in home_sections %}
+  {% if section_data.items %}
+  <section class="content-section" id="{{ section_data.section.section_type }}">
+    <div class="section-title">
+      <div>
+        <span>{{ section_data.section.title }}</span>
+        {% if section_data.section.subtitle %}
+        <h2>{{ section_data.section.subtitle }}</h2>
+        {% endif %}
+      </div>
+      {% if section_data.section.link_url %}
+      <a href="{{ section_data.section.link_url }}">{{ section_data.section.link_label|default:"مشاهده همه ←" }}</a>
+      {% endif %}
+    </div>
+    
+    {% include section_data.template with items=section_data.items section=section_data.section only %}
+  </section>
+  {% endif %}
+{% endfor %}
+
+{% if latest_albums %}
+<section class="content-section" id="albums">
+  <div class="section-title">
+    <div><span>مجموعه‌های شنیدنی</span><h2>آلبوم‌ها و پلی‌لیست‌ها</h2></div>
+    <a href="{% url 'albums:list' %}">آرشیو کامل ←</a>
+  </div>
+  <div class="album-grid">
+    {% for album in latest_albums %}
+    <a class="album-card" href="{{ album.get_absolute_url }}">
+      {% if album.cover %}
+        <img src="{{ album.cover.url }}" alt="{{ album.title }}" loading="lazy">
+      {% else %}
+        <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+      {% endif %}
+      <b>{{ album.title }}</b>
+      <small>{{ album.artists.first.name|default:"مجموعه" }} · {{ album.track_total }} قطعه</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Pass data to JS for player
+window.avaData = {
+  songs: [
+    {% for song in latest_songs %}
+    {
+      title: "{{ song.title|escapejs }}",
+      artist: "{{ song.primary_artist.name|escapejs }}",
+      duration: {{ song.duration }},
+      cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/cover-1.svg' %}{% endif %}",
+      url: "{{ song.get_absolute_url }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+};
+</script>
+{% endblock %}

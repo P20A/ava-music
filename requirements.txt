@@ -1,0 +1,11 @@
+# Python 3.11+ / 3.12+ (ParsPack PaaS)
+Django==5.2.19
+gunicorn==23.0.0
+whitenoise==6.12.0
+Pillow==12.0.0
+psycopg[binary]==3.3.9
+mutagen==1.48.1
+python-dotenv==1.2.4
+django-storages[boto3]==1.14.6
+boto3==1.44.5
+jdatetime==5.3.1

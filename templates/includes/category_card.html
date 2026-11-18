@@ -1,0 +1,16 @@
+{% load static %}
+{% for category in items %}
+<a href="{{ category.get_absolute_url }}" class="category-card" style="display:block;text-decoration:none;color:inherit;">
+  <div class="category-card-inner" style="padding:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);text-align:center;transition:var(--transition);">
+    {% if category.image %}
+      <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width:60px;height:60px;object-fit:cover;border-radius:50%;margin-bottom:8px;">
+    {% else %}
+      <div style="width:60px;height:60px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;">{{ category.icon|default:"♪" }}</div>
+    {% endif %}
+    <b>{{ category.name }}</b>
+    <small style="display:block;color:var(--muted);margin-top:4px;">{{ category.song_count }} آهنگ</small>
+  </div>
+</a>
+{% empty %}
+<p class="empty-state">هیچ دسته‌بندی برای نمایش وجود ندارد.</p>
+{% endfor %}

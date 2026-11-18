@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}پروفایل کاربری | {{ site.site_name }}{% endblock %}
+
+{% block page_name %}profile{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>پروفایل</b></nav>
+
+<div class="wrap page-layout">
+  <section class="main-column">
+    <section class="panel">
+      <div class="panel-head"><h2>اطلاعات حساب</h2></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px 0;">
+        {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="{{ profile.display_name }}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--ice)">
+        {% else %}
+        <div style="width:100px;height:100px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:40px;color:white;">{{ profile.display_name|first }}</div>
+        {% endif %}
+        <h2>{{ profile.display_name }}</h2>
+        <small style="color:var(--muted);">@{{ profile.username }}</small>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+          <a href="{% url 'users:profile_edit' %}" class="btn btn-primary btn-sm">ویرایش پروفایل</a>
+          <a href="{% url 'users:password_change' %}" class="btn btn-ghost btn-sm">تغییر رمز عبور</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:16px;">
+      <div class="panel-head"><h2>آمار حساب</h2></div>
+      <div class="stat-row" style="margin-top:16px;">
+        <div class="stat"><b>{{ likes.count }}</b><small>آهنگ‌های پسندیده</small></div>
+        <div class="stat"><b>{{ submissions.count }}</b><small>آثار ارسالی</small></div>
+        <div class="stat"><b>{{ followed_artists.count }}</b><small>هنرمندانی که دنبال می‌کنم</small></div>
+        <div class="stat"><b>{{ profile.date_joined|fa_date }}</b><small>تاریخ عضویت</small></div>
+      </div>
+    </section>
+
+    {% if likes %}
+    <section class="panel" style="margin-top:16px;">
+      <div class="panel-head"><h2>آهنگ‌های پسندیده</h2><a href="{% url 'users:favorites' %}">همه ←</a></div>
+      <div class="song-grid">
+        {% for like in likes|slice:":6" %}
+        <article class="song-card" data-song="{{ like.song.title }}" data-artist="{{ like.song.primary_artist.name }}">
+          <a class="song-thumb" href="{{ like.song.get_absolute_url }}">
+            {% if like.song.cover_image %}
+              <img src="{{ like.song.cover_image.url }}" alt="کاور {{ like.song.title }}" loading="lazy">
+            {% else %}
+              <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+            {% endif %}
+            <span class="cover-play" data-play data-song="{{ like.song.title }}" data-artist="{{ like.song.primary_artist.name }}" data-duration="{{ like.song.duration }}">▶</span>
+          </a>
+          <div class="song-card-body">
+            <div class="post-meta"><span class="tag">{{ like.song.tag_label }}</span><time>{{ like.song.release_date|fa_date_short }}</time></div>
+            <h3><a href="{{ like.song.get_absolute_url }}">{{ like.song.title }} — {{ like.song.primary_artist.name }}</a></h3>
+            <div class="card-foot"><span><b>{{ like.song.primary_artist.name }}</b></span><a class="read-more" href="{{ like.song.get_absolute_url }}">دانلود <b>←</b></a></div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </section>
+
+  <aside class="sidebar">
+    <section class="side-box">
+      <div class="side-heading"><h2>منوی کاربری</h2></div>
+      <ul class="list-clean" style="display:flex;flex-direction:column;gap:8px;">
+        <li><a href="{% url 'users:profile' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">پروفایل <span>👤</span></a></li>
+        <li><a href="{% url 'users:favorites' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">آهنگ‌های پسندیده <span>♥</span></a></li>
+        <li><a href="{% url 'users:history' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">تاریخچه پخش <span>🕐</span></a></li>
+        <li><a href="{% url 'users:followed_artists' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">هنرمندانی که دنبال می‌کنم <span>✦</span></a></li>
+        <li><a href="{% url 'submissions:create' %}" class="btn btn-primary" style="width:100%;justify-content:space-between;">ارسال اثر <span>📤</span></a></li>
+        <li><a href="{% url 'users:logout' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;color:var(--destructive);">خروج <span>←</span></a></li>
+      </ul>
+    </section>
+
+    {% if submissions %}
+    <section class="side-box" style="margin-top:16px;">
+      <div class="side-heading"><h2>آثار اخیر ارسالی</h2></div>
+      <ul class="list-clean" style="font-size:13px;">
+        {% for sub in submissions|slice:":5" %}
+        <li style="padding:8px 0;border-bottom:1px solid var(--line);">
+          <b>{{ sub.title }}</b>
+          <small style="display:block;color:var(--muted);">{{ sub.get_status_display }} — {{ sub.created_at|fa_date }}</small>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

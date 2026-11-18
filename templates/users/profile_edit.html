@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}ویرایش پروفایل | {{ site.site_name }}{% endblock %}
+
+{% block page_name %}profile_edit{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>ویرایش</b></nav>
+
+<div class="wrap" style="max-width:600px;">
+  <section class="panel" style="margin-top:40px;">
+    <div class="panel-head"><h2>ویرایش پروفایل</h2></div>
+    
+    <form method="post" action="{% url 'users:profile_edit' %}" enctype="multipart/form-data" class="comment-form" data-demo-form>
+      {% csrf_token %}
+      
+      <div class="form-grid">
+        <label class="field full" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <span>تصویر پروفایل</span>
+          {% if form.avatar.value %}
+          <img src="{{ form.avatar.value.url }}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+          {% endif %}
+          <input class="file-input" type="file" name="avatar" accept="image/*">
+          <span class="file-name">فایل خود را انتخاب کنید یا اینجا رها کنید</span>
+          {% if form.avatar.errors %}<span class="error">{{ form.avatar.errors.0 }}</span>{% endif %}
+        </label>
+        
+        <label class="field">
+          <span>نام</span>
+          <input class="input" type="text" name="first_name" value="{{ form.first_name.value|default:'' }}">
+          {% if form.first_name.errors %}<span class="error">{{ form.first_name.errors.0 }}</span>{% endif %}
+        </label>
+        <label class="field">
+          <span>نام خانوادگی</span>
+          <input class="input" type="text" name="last_name" value="{{ form.last_name.value|default:'' }}">
+          {% if form.last_name.errors %}<span class="error">{{ form.last_name.errors.0 }}</span>{% endif %}
+        </label>
+        <label class="field full">
+          <span>ایمیل</span>
+          <input class="input" type="email" name="email" value="{{ form.email.value|default:'' }}" required>
+          {% if form.email.errors %}<span class="error">{{ form.email.errors.0 }}</span>{% endif %}
+        </label>
+        <label class="field full">
+          <span>درباره من</span>
+          <textarea class="textarea" name="bio" rows="4">{{ form.bio.value|default:'' }}</textarea>
+        </label>
+        <label class="field">
+          <span>وب‌سایت</span>
+          <input class="input" type="url" name="website" placeholder="https://example.com" value="{{ form.website.value|default:'' }}">
+        </label>
+        <label class="field">
+          <span>اینستاگرام</span>
+          <input class="input" type="text" name="instagram" placeholder="@username" value="{{ form.instagram.value|default:'' }}">
+        </label>
+        <label class="field">
+          <span>تلگرام</span>
+          <input class="input" type="text" name="telegram" placeholder="@username" value="{{ form.telegram.value|default:'' }}">
+        </label>
+        <label class="field full" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" name="newsletter_opt_in" {% if form.newsletter_opt_in.value %}checked{% endif %}>
+          <span>عضویت در خبرنامه</span>
+        </label>
+      </div>
+      
+      <div class="field-row" style="margin-top:24px;">
+        <button class="btn btn-primary" type="submit" style="width:100%;padding:14px;">ذخیره تغییرات</button>
+      </div>
+      
+      {% if messages %}
+      <div class="form-msg" role="status">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </form>
+  </section>
+</div>
+{% endblock %}

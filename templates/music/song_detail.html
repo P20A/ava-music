@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}{{ song.title }} — {{ song.primary_artist.name }} | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}{% if song.seo_description %}{{ song.seo_description }}{% elif song.short_description %}{{ song.short_description }}{% else %}دانلود آهنگ {{ song.title }} از {{ song.primary_artist.name }} با کیفیت ۱۲۸ و ۳۲۰، متن ترانه و پخش آنلاین در {{ site.site_name }}.{% endif %}{% endblock %}
+
+{% block og_title %}{{ song.title }} — {{ song.primary_artist.name }}{% endblock %}
+{% block og_description %}{{ song.seo_description|default:song.short_description }}{% endblock %}
+{% block og_image %}{{ song.cover_image.url|default:site.share_image.url }}{% endblock %}
+
+{% block page_name %}song{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه">
+  <a href="{% url 'core:home' %}">خانه</a>
+  <i>›</i>
+  <a href="{% url 'core:archive' %}">آهنگ جدید</a>
+  <i>›</i>
+  <b>{{ song.title }}</b>
+</nav>
+
+<article class="song-hero">
+  <div class="song-art">
+    {% if song.cover_image %}
+      <img src="{{ song.cover_image.url }}" alt="کاور آهنگ {{ song.title }} از {{ song.primary_artist.name }}">
+    {% else %}
+      <img src="{% static 'images/cover-1.svg' %}" alt="کاور پیش‌فرض">
+    {% endif %}
+    {% if song.is_featured %}
+    <span class="badge">آهنگ ویژه</span>
+    {% elif song.tag_label %}
+    <span class="badge">{{ song.tag_label }}</span>
+    {% endif %}
+  </div>
+  <div class="song-info">
+    <div class="post-meta">
+      {% for cat in song.categories.all|slice:":1" %}
+      <span class="tag">{{ cat.name }}</span>
+      {% endfor %}
+      <span>{{ song.album_tracks.first.album.album_type|default:"تک‌آهنگ" }}</span>
+      <time>{{ song.release_date|fa_date }}</time>
+    </div>
+    <h1>{{ song.title }}</h1>
+    <div class="meta-row">
+      <span>خواننده: <b><a href="{{ song.primary_artist.get_absolute_url }}">{{ song.primary_artist.name }}</a></b></span>
+      {% if song.composer %}
+      <span class="dot">•</span>
+      <span>آهنگساز: <b>{{ song.composer }}</b></span>
+      {% endif %}
+      <span class="dot">•</span>
+      <span>مدت: <b>{{ song.duration|fa_duration }}</b></span>
+      <span class="dot">•</span>
+      <span>بازدید: <b>{{ song.view_count|fa_number }}</b></span>
+    </div>
+    <p>{{ song.description|default:"توضیحات برای این آهنگ موجود نیست." }}</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶ پخش آنلاین</button>
+      <a class="btn btn-ghost" href="#downloads">↓ دانلود آهنگ</a>
+      <button class="btn btn-soft" data-like data-song="{{ song.slug }}" data-count="{{ song.like_count }}" data-like-url="{% url 'music:like' song.slug %}" aria-label="پسندیدن">♡ {{ song.like_count|fa_number }}</button>
+    </div>
+    <div class="share-row">
+      <span>اشتراک‌گذاری:</span>
+      <button data-share="telegram" data-url="{{ request.build_absolute_uri }}" aria-label="تلگرام">✈</button>
+      <button data-share="whatsapp" data-url="{{ request.build_absolute_uri }}" aria-label="واتساپ">☘</button>
+      <button data-share="instagram" aria-label="اینستاگرام">◎</button>
+      <button data-share="copy" data-url="{{ request.build_absolute_uri }}" aria-label="کپی لینک">⧉</button>
+    </div>
+  </div>
+</article>
+
+<div class="player-box" data-song-player 
+  data-title="{{ song.title }} — {{ song.primary_artist.name }}" 
+  data-artist="{{ song.primary_artist.name }}" 
+  data-duration="{{ song.duration }}"
+  data-song-slug="{{ song.slug }}">
+  {% if song.is_playable %}
+  <audio data-player-audio preload="metadata" src="{% url 'music:stream' slug=song.slug %}"></audio>
+  {% endif %}
+  <div class="player-top">
+    <button class="dock-play" data-player-toggle aria-label="پخش">▶</button>
+    <div class="wave" data-wave aria-hidden="true"></div>
+    {% if song.preview_audio %}
+    <span class="player-badge" style="font-size:9px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:4px 9px">پیش‌نمایش ۳۰ ثانیه</span>
+    {% endif %}
+  </div>
+  <div class="track-progress" role="slider" aria-label="پیشرفت پخش" aria-valuemin="0" aria-valuemax="{{ song.duration }}" aria-valuenow="0" tabindex="0"><b data-player-bar></b></div>
+  <div class="player-time"><span data-player-time>۰:۰۰</span><span data-duration="{{ song.duration }}">{{ song.duration|fa_duration }}</span></div>
+</div>
+
+<section class="panel" id="downloads" style="margin-top:16px">
+  <div class="panel-head"><h2>دانلود آهنگ {{ song.title }}</h2><span>فرمت MP3 · کیفیت اصلی</span></div>
+  <div class="quality-grid">
+    {% if song.audio_320 %}
+    <a class="dl-btn primary" href="{{ song.get_absolute_url }}download/320/" data-quality="320"><span>کیفیت ۳۲۰ کیلوبیت</span><b>↓</b></a>
+    {% endif %}
+    {% if song.audio_128 %}
+    <a class="dl-btn" href="{{ song.get_absolute_url }}download/128/" data-quality="128"><span>کیفیت ۱۲۸ کیلوبیت</span><b>↓</b></a>
+    {% endif %}
+    {% if song.instrumental_audio %}
+    <a class="dl-btn" href="{{ song.get_absolute_url }}download/instrumental/" data-quality="instrumental"><span>نسخه اینسترومنتال</span><b>↓</b></a>
+    {% endif %}
+    {% if song.lyrics %}
+    <a class="dl-btn" href="{{ song.get_absolute_url }}download/lyrics/" data-quality="lyrics"><span>دانلود متن ترانه</span><b>↓</b></a>
+    {% endif %}
+  </div>
+  {% if site.contact_email %}
+  <p class="form-note" style="margin-top:12px">لینک‌های دانلود مستقیماً به فایل‌های صوتی متصل هستند. تمام حقوق اثر متعلق به صاحب آن است.</p>
+  {% endif %}
+</section>
+
+{% if song.lyrics %}
+<section class="panel" style="margin-top:16px">
+  <div class="panel-head"><h2>متن ترانه «{{ song.title }}»</h2><button class="copy-btn" data-copy="#lyrics">کپی متن</button></div>
+  <div class="lyrics-box" id="lyrics">{{ song.lyrics|linebreaksbr }}</div>
+</section>
+{% endif %}
+
+<section class="panel" style="margin-top:16px">
+  <div class="panel-head"><h2>مشخصات آهنگ</h2><span>اطلاعات انتشار</span></div>
+  <div class="info-grid">
+    <div class="info-item"><span>خواننده</span><b><a href="{{ song.primary_artist.get_absolute_url }}">{{ song.primary_artist.name }}</a></b></div>
+    {% if song.composer %}
+    <div class="info-item"><span>آهنگساز</span><b>{{ song.composer }}</b></div>
+    {% endif %}
+    {% if song.lyricist %}
+    <div class="info-item"><span>ترانه‌سرا</span><b>{{ song.lyricist }}</b></div>
+    {% endif %}
+    {% if song.arranger %}
+    <div class="info-item"><span>تنظیم‌کننده</span><b>{{ song.arranger }}</b></div>
+    {% endif %}
+    {% if song.categories.first %}
+    <div class="info-item"><span>سبک</span><b>{{ song.categories.first.name }}</b></div>
+    {% endif %}
+    {% if song.release_date %}
+    <div class="info-item"><span>زمان انتشار</span><b>{{ song.release_date|fa_date }}</b></div>
+    {% endif %}
+    <div class="info-item"><span>مدت زمان</span><b>{{ song.duration|fa_duration }}</b></div>
+    <div class="info-item"><span>کیفیت</span><b>{% if song.has_320 %}۳۲۰{% endif %}{% if song.has_320 and song.has_128 %} / {% endif %}{% if song.has_128 %}۱۲۸{% endif %}</b></div>
+    <div class="info-item"><span>زبان</span><b>{{ song.get_language_display }}</b></div>
+  </div>
+</section>
+
+{% if site.comments_enabled %}
+<section class="panel" style="margin-top:16px">
+  <div class="panel-head"><h2>دیدگاه‌ها</h2><span>{{ comments|length }} دیدگاه</span></div>
+  <div class="comment-list" id="commentList">
+    {% for comment in comments %}
+    <div class="comment">
+      <span class="avatar">{{ comment.initial }}</span>
+      <div>
+        <div class="comment-head"><b>{{ comment.name }}</b><time>{{ comment.created_at|fa_date }}</time></div>
+        <p>{{ comment.body }}</p>
+      </div>
+    </div>
+    {% empty %}
+    <p class="comment-empty" style="color:var(--muted);text-align:center;padding:16px;">هنوز دیدگاهی برای این آهنگ ثبت نشده. اولین نفر باشید!</p>
+    {% endfor %}
+  </div>
+  {% if user.is_authenticated %}
+  <form class="comment-form" id="commentForm" method="post" action="{% url 'music:comment' song.slug %}" data-demo-form>
+    {% csrf_token %}
+    <div class="form-grid">
+      <label class="field">نام شما<input class="input" type="text" name="name" placeholder="نام و نام خانوادگی" value="{{ user.get_full_name|default:user.username }}" required></label>
+      <label class="field">ایمیل (اختیاری)<input class="input" type="email" name="email" placeholder="email@example.com" value="{{ user.email }}"></label>
+      <label class="field full">دیدگاه شما<textarea class="textarea" name="body" placeholder="دیدگاه خود را درباره این آهنگ بنویسید..." required></textarea></label>
+    </div>
+    <div class="field-row"><span class="form-note">ایمیل شما منتشر نخواهد شد.</span><button class="btn btn-primary btn-sm" type="submit">ارسال دیدگاه</button></div>
+    <div class="form-msg" role="status"></div>
+  </form>
+  {% else %}
+  <p style="text-align:center;margin-top:16px;">
+    <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">ورود برای ارسال دیدگاه</a>
+  </p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if related_songs %}
+<section class="content-section">
+  <div class="section-title"><div><span>پیشنهاد آوا</span><h2>آهنگ‌های مرتبط</h2></div><a href="{% url 'core:archive' %}">همه آهنگ‌ها ←</a></div>
+  <div class="song-grid">
+    {% for related in related_songs %}
+    <article class="song-card" data-song="{{ related.title }}" data-artist="{{ related.primary_artist.name }}">
+      <a class="song-thumb" href="{{ related.get_absolute_url }}">
+        {% if related.cover_image %}
+          <img src="{{ related.cover_image.url }}" alt="کاور {{ related.title }}" loading="lazy">
+        {% else %}
+          <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+        {% endif %}
+        <span class="cover-play" data-play data-song="{{ related.title }}" data-artist="{{ related.primary_artist.name }}" data-duration="{{ related.duration }}">▶</span>
+      </a>
+      <div class="song-card-body">
+        <div class="post-meta"><span class="tag">{{ related.tag_label }}</span><time>{{ related.release_date|fa_date_short }}</time></div>
+        <h3><a href="{{ related.get_absolute_url }}">{{ related.title }} — {{ related.primary_artist.name }}</a></h3>
+        <p>{{ related.short_description }}</p>
+        <div class="card-foot"><span><b>{{ related.primary_artist.name }}</b></span><a class="read-more" href="{{ related.get_absolute_url }}">دانلود <b>←</b></a></div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.avaSongData = {
+  slug: "{{ song.slug }}",
+  title: "{{ song.title|escapejs }}",
+  artist: "{{ song.primary_artist.name|escapejs }}",
+  duration: {{ song.duration }},
+  cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/cover-1.svg' %}{% endif %}",
+  has320: {% if song.has_320 %}true{% else %}false{% endif %},
+  has128: {% if song.has_128 %}true{% else %}false{% endif %},
+  hasInstrumental: {% if song.instrumental_audio %}true{% else %}false{% endif %},
+  hasPreview: {% if song.preview_audio %}true{% else %}false{% endif %}
+};
+</script>
+{% endblock %}

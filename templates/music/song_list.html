@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}آهنگ‌ها | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}فهرست تمام آهنگ‌های منتشرشده در {{ site.site_name }} با امکان جستجو، مرتب‌سازی و فیلتر بر اساس دسته‌بندی.{% endblock %}
+
+{% block page_name %}songs{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه">
+  <a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آهنگ‌ها</b>
+</nav>
+
+<header class="page-header">
+  <h1>آهنگ‌ها</h1>
+  <p class="lead">کشف و جستجوی آهنگ‌های تازه و محبوب</p>
+</header>
+
+<div class="toolbar" data-filter-group data-filter-target="#songGrid" data-empty="#songEmpty">
+  <div class="chip-row" id="songCategories">
+    <button class="chip active" data-filter="all">همه</button>
+    {% for cat in categories %}
+    <button class="chip" data-filter="{{ cat.slug }}">{{ cat.name }}</button>
+    {% endfor %}
+  </div>
+  <span class="spacer"></span>
+  <select class="field-select" data-sort data-sort-target="#songGrid" aria-label="مرتب‌سازی" onchange="window.location.href=this.value">
+    <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>جدیدترین</option>
+    <option value="?sort=views"{% if current_sort == 'views' %} selected{% endif %}>پربازدیدترین</option>
+    <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>بیشترین پخش</option>
+    <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
+  </select>
+</div>
+
+<div class="song-grid" id="songGrid" data-filter-group>
+  {% for song in songs %}
+  {% include "includes/song_card.html" with items=songs only %}
+  {% empty %}
+  <p class="empty-state" id="songEmpty">هیچ آهنگی یافت نشد.</p>
+  {% endfor %}
+</div>
+
+{% if songs.has_other_pages %}
+<nav class="pagination" aria-label="صفحه‌بندی">
+  {% if songs.has_previous %}
+  <a href="?page={{ songs.previous_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه قبل">‹ قبلی</a>
+  {% endif %}
+  <span class="page-info">صفحه {{ songs.number }} از {{ songs.paginator.num_pages }}</span>
+  {% if songs.has_next %}
+  <a href="?page={{ songs.next_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه بعد">بعدی ›</a>
+  {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

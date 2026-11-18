@@ -1,0 +1,197 @@
+{% load static i18n persian_filters %}
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="{{ request.session.theme|default:site.default_theme|default:'dark' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="{{ site.theme_color|default:'#091540' }}">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ site.site_name|default:"آوا موزیک" }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ site.default_seo_description }}{% endblock %}">
+  <meta name="keywords" content="{% block meta_keywords %}{{ site.default_keywords }}{% endblock %}">
+  
+  {% block og_tags %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ site.site_name }}">
+  <meta property="og:title" content="{% block og_title %}{{ site.site_name }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site.default_seo_description }}{% endblock %}">
+  <meta property="og:url" content="{{ canonical_url|default:request.build_absolute_uri }}">
+  <meta property="og:image" content="{% if site.share_image %}{{ site.share_image.url }}{% endif %}">
+  {% endblock %}
+  
+  {% block twitter_tags %}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@avamusic">
+  {% endblock %}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  {% if site.favicon %}
+  <link rel="icon" href="{{ site.favicon.url }}">
+  {% else %}
+  <link rel="icon" href="{% static 'images/favicon.ico' %}">
+  {% endif %}
+  
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  
+  {% block extra_css %}{% endblock %}
+</head>
+<body data-page="{% block page_name %}home{% endblock %}">
+
+<header class="masthead">
+  <div class="topline wrap">
+    <span>{{ site.site_tagline|default:"آرشیو موسیقی فارسی" }}</span>
+    <span>{{ site.site_description|default:"تازه‌ترین آهنگ‌ها، آلبوم‌ها و ریمیکس‌ها" }}</span>
+    <div class="top-tools">
+      {% if site.submissions_enabled %}
+      <a href="{% url 'submissions:create' %}">ارسال اثر</a>
+      {% endif %}
+      <button id="themeBtn" class="theme-btn" aria-label="تغییر حالت رنگ">
+        {% if request.session.theme == 'light' or request.session.theme|default:site.default_theme|default:'dark' == 'light' %}
+        ☾ <span>حالت تیره</span>
+        {% else %}
+        ☼ <span>حالت روشن</span>
+        {% endif %}
+      </button>
+    </div>
+  </div>
+  
+  <div class="brandline wrap">
+    <a class="logo" href="{% url 'core:home' %}">
+      {% if site.logo %}
+        <img src="{{ site.logo.url }}" alt="{{ site.site_name }}" style="height: 36px;">
+      {% else %}
+        <span class="logo-icon">آ</span>
+        <span>{{ site.site_name }}<small>AVA MUSIC ARCHIVE</small></span>
+      {% endif %}
+    </a>
+    
+    {% if site.ads_enabled %}
+    <div class="brand-ad">
+      {% include "includes/ads.html" with placement="header" %}
+    </div>
+    {% else %}
+    <div class="brand-ad">
+      <b>صدای تازه، همین‌جاست</b>
+      <span>هر روز با جدیدترین انتشارهای موسیقی همراه باش</span>
+    </div>
+    {% endif %}
+    
+    <form class="search" id="searchForm" role="search" action="{% url 'core:search' %}">
+      <input id="search" type="search" name="q" placeholder="نام خواننده یا آهنگ را جستجو کنید..." aria-label="جستجو" value="{{ request.GET.q|default:'' }}">
+      <button type="submit" aria-label="جستجو">⌕</button>
+    </form>
+  </div>
+  
+  <nav class="main-nav" aria-label="فهرست اصلی">
+    <div class="wrap nav-inner">
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false">☰ <span>فهرست</span></button>
+      <div class="nav-links" id="navLinks">
+        {% for link in header_links %}
+        <a href="{{ link.url }}" {% if request.path == link.url %}class="current"{% endif %} {% if link.open_new_tab %}target="_blank"{% endif %}>{{ link.label }}</a>
+        {% endfor %}
+        {% if not header_links %}
+        <a href="{% url 'core:home' %}" {% if request.path == '/' %}class="current"{% endif %}>صفحه اصلی</a>
+        <a href="{% url 'core:archive' %}" {% if '/archive' in request.path %}class="current"{% endif %}>آهنگ جدید</a>
+        <a href="{% url 'core:archive' %}#special" class="current">آهنگ ویژه</a>
+        <a href="{% url 'core:archive' %}#remix">ریمیکس</a>
+        <a href="{% url 'albums:list' %}" {% if '/albums' in request.path %}class="current"{% endif %}>آلبوم</a>
+        <a href="{% url 'core:archive' %}#video">موزیک ویدیو</a>
+        <a href="{% url 'artists:list' %}" {% if '/artists' in request.path %}class="current"{% endif %}>خوانندگان</a>
+        {% endif %}
+      </div>
+      <a class="nav-hot" href="{% url 'core:home' %}#popular"><i></i> پربازدیدترین‌ها</a>
+    </div>
+  </nav>
+</header>
+
+{% block hero_banner %}
+{% if hero_banner %}
+  <section class="hero-banner-wrap">
+    {% include "includes/banner.html" with banner=hero_banner %}
+  </section>
+{% endif %}
+{% endblock %}
+
+{% if messages %}
+<div class="wrap" style="display:grid;gap:8px;margin-top:14px;">
+  {% for message in messages %}
+  <div class="panel" style="padding:12px 16px;border-right:4px solid var(--primary);font-size:13px;">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main class="wrap page-layout">
+  {% block content %}
+  {% endblock %}
+</main>
+
+<footer class="footer" id="contact">
+  <div class="wrap footer-inner">
+    <a class="logo" href="{% url 'core:home' %}">
+      {% if site.logo %}
+        <img src="{{ site.logo.url }}" alt="{{ site.site_name }}" style="height: 36px;">
+      {% else %}
+        <span class="logo-icon">آ</span>
+        <span>{{ site.site_name }}<small>AVA MUSIC ARCHIVE</small></span>
+      {% endif %}
+    </a>
+    
+    <p>{{ site.footer_about|default:"آوا؛ آرشیوی برای کشف موسیقی تازه و شنیدن دوباره آهنگ‌های محبوب." }}</p>
+    
+    <div class="footer-links">
+      {% for link in footer_links %}
+      <a href="{{ link.url }}" {% if link.open_new_tab %}target="_blank"{% endif %}>{{ link.label }}</a>
+      {% endfor %}
+      {% if not footer_links %}
+      <a href="{% url 'core:page' slug='about' %}">درباره آوا</a>
+      <a href="{% url 'core:contact' %}">تماس با ما</a>
+      <a href="{% url 'submissions:create' %}">ارسال اثر</a>
+      <a href="{% url 'core:archive' %}">قوانین انتشار</a>
+      {% endif %}
+    </div>
+    
+    <small class="copyright">{{ site.footer_copyright|default:"© ۱۴۰۵ آوا موزیک — تمامی حقوق محفوظ است." }}</small>
+
+    <form class="newsletter-form" method="post" action="{% url 'core:subscribe' %}" style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      {% csrf_token %}
+      <input class="input" type="email" name="email" placeholder="ایمیل شما برای خبرنامه" required style="max-width:260px;flex:1 1 220px;">
+      <button class="btn btn-primary btn-sm" type="submit">عضویت</button>
+    </form>
+  </div>
+</footer>
+
+<div class="audio-dock" id="audioDock" role="region" aria-label="پخش‌کننده صوتی">
+  <div class="dock-song">
+    <span class="dock-cover">♫</span>
+    <span><b id="dockTitle">پخش نمونه</b><small id="dockArtist">آوا موزیک</small></span>
+  </div>
+  <div class="dock-controls">
+    <button data-dock-prev aria-label="قبلی">|◀</button>
+    <button id="playPause" class="dock-play" aria-label="پخش">▶</button>
+    <button data-dock-next aria-label="بعدی">▶|</button>
+  </div>
+  <div class="dock-progress"><span id="dockCur">۰:۰۰</span><i><b id="dockBar"></b></i><span>۳:۲۹</span></div>
+  <button id="closeDock" class="dock-close" aria-label="بستن">×</button>
+</div>
+
+<button class="to-top" id="toTop" aria-label="بازگشت به بالای صفحه">↑</button>
+
+<script src="{% static 'js/main.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+
+{% if site.google_analytics_id %}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics_id }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{ site.google_analytics_id }}');
+</script>
+{% endif %}
+
+</body>
+</html>

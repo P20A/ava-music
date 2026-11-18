@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}ارسال موفق | {{ site.site_name }}{% endblock %}
+
+{% block page_name %}submission_success{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>ارسال اثر</b></nav>
+
+<section class="page-hero" style="text-align:center;padding:60px 20px;">
+  <div style="font-size:80px;margin-bottom:24px;">✓</div>
+  <h1>اثر شما با موفقیت ارسال شد</h1>
+  <p style="color:var(--muted);max-width:500px;margin:16px auto 32px;">تیم تحریریه {{ site.site_name }} در اسرع وقت اثر شما را بررسی کرده و در صورت تایید منتشر خواهد کرد.</p>
+  <a href="{% url 'core:home' %}" class="btn btn-primary">بازگشت به خانه</a>
+</section>
+
+<section class="wrap" style="max-width:600px;margin:0 auto;padding:0 20px;">
+  <div class="panel">
+    <div class="panel-head"><h2>چه اتفاقی می‌افتد؟</h2></div>
+    <ol style="margin-top:16px;padding-right:20px;line-height:2;">
+      <li>تیم ما فایل‌ها و اطلاعات را بررسی می‌کند</li>
+      <li>در صورت نیاز، با شما از طریق ایمیل تماس می‌گیریم</li>
+      <li>پس از تایید، اثر در سایت منتشر می‌شود</li>
+      <li>شما از طریق ایمیل از نتیجه مطلع می‌شوید</li>
+    </ol>
+  </div>
+  <div class="panel" style="margin-top:16px;">
+    <div class="panel-head"><h2>پیگیری وضعیت</h2></div>
+    <p style="margin-top:16px;">شما می‌توانید با مراجعه به پنل کاربری (در صورت ثبت‌نام) یا از طریق ایمیل، وضعیت ارسال خود را پیگیری کنید.</p>
+    {% if status_url %}
+    <a href="{{ status_url }}" class="btn btn-primary" style="margin-top:16px;display:inline-block;">پیگیری وضعیت این اثر</a>
+    {% endif %}
+    <a href="{% url 'submissions:create' %}" class="btn btn-ghost" style="margin-top:16px;display:inline-block;">ارسال اثر دیگر</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}صفحه یافت نشد | {{ site.site_name }}{% endblock %}
+
+{% block page_name %}404{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <h1>۴۰۴</h1>
+  <h2>صفحه مورد نظر یافت نشد</h2>
+  <p>متأسفیم، پیوندی که دنبالش هستید وجود ندارد یا منتقل شده است.</p>
+  <div class="error-actions">
+    <a href="{% url 'core:home' %}" class="btn btn-primary">بازگشت به خانه</a>
+    <a href="{% url 'core:archive' %}" class="btn btn-ghost">مشاهده آرشیو آهنگ‌ها</a>
+  </div>
+</div>
+{% endblock %}

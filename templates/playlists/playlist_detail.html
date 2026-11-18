@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}{{ playlist.name }} | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}{% if playlist.seo_description %}{{ playlist.seo_description }}{% elif playlist.description %}{{ playlist.description }}{% else %}پلی‌لیست {{ playlist.name }} در {{ site.site_name }}؛ {% if playlist.items.first %}{{ playlist.items.first.song.title }}{% endif %} و {% if playlist.track_total|add:-1 > 0 %}{{ playlist.track_total|add:-1 }} آهنگ دیگر{% endif %}.{% endif %}{% endblock %}
+
+{% block og_title %}{{ playlist.name }}{% endblock %}
+{% block og_description %}{{ playlist.seo_description|default:playlist.description }}{% endblock %}
+{% block og_image %}{{ playlist.cover.url|default:site.share_image.url }}{% endblock %}
+
+{% block page_name %}playlist{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'playlists:list' %}">پلی‌لیست‌ها</a><i>›</i><b>{{ playlist.name }}</b></nav>
+
+<article class="album-hero">
+  <img class="big-cover" src="{% if playlist.cover %}{{ playlist.cover.url }}{% else %}{% static 'images/cover-1.svg' %}{% endif %}" alt="کاور پلی‌لیست {{ playlist.name }}">
+  <div class="album-info">
+    <div class="post-meta"><span class="tag">پلی‌لیست</span><span>عمومی</span></div>
+    <h1>{{ playlist.name }}</h1>
+    <div class="meta-row">
+      <span>سازنده: <b>{% if playlist.owner %}<a href="#">{{ playlist.owner.display_name }}</a>{% else %}تیم آوا{% endif %}</b></span>
+      <span class="dot">•</span>
+      <span>{{ playlist.track_total }} قطعه</span>
+      <span class="dot">•</span>
+      <span>{{ playlist.total_duration|fa_duration }}</span>
+    </div>
+    <p>{{ playlist.description|default:"توضیحات برای این پلی‌لیست موجود نیست." }}</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" data-play-album="{{ playlist.name }}" data-album-artist="پلی‌لیست آوا">▶ پخش کل پلی‌لیست</button>
+      <button class="btn btn-soft" data-share="copy">⧉ اشتراک پلی‌لیست</button>
+    </div>
+  </div>
+</article>
+
+<section class="panel" style="margin-top:16px">
+  <div class="panel-head"><h2>فهرست قطعات</h2><span>{{ playlist.track_total }} قطعه · {{ playlist.total_duration|fa_duration }}</span></div>
+  <div class="tracklist">
+    {% for item in items %}
+    <div class="track" data-song="{{ item.song.title }}" data-artist="{{ item.song.primary_artist.name }}" data-duration="{{ item.song.duration }}">
+      <span class="track-num">{{ forloop.counter }}</span>
+      <div class="track-title">
+        <a href="{{ item.song.get_absolute_url }}">{{ item.song.title }}</a>
+        <small>{{ item.song.primary_artist.name }}</small>
+      </div>
+      <span class="track-time">{{ item.song.duration|fa_duration }}</span>
+      <div class="track-actions">
+        <button class="icon-btn" data-play data-song="{{ item.song.title }}" data-artist="{{ item.song.primary_artist.name }}" data-duration="{{ item.song.duration }}" aria-label="پخش {{ item.song.title }}">▶</button>
+        {% if item.song.has_320 %}
+        <a class="icon-btn" href="{{ item.song.get_absolute_url }}download/320/" aria-label="دانلود {{ item.song.title }} ۳۲۰">↓</a>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <p class="empty-state">هیچ قطعه‌ای در این پلی‌لیست وجود ندارد.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% if related_playlists %}
+<section class="content-section">
+  <div class="section-title"><div><span>پلی‌لیست‌های مشابه</span><h2>پلی‌لیست‌های مرتبط</h2></div><a href="{% url 'playlists:list' %}">همه پلی‌لیست‌ها ←</a></div>
+  <div class="album-grid col-4">
+    {% for related in related_playlists %}
+    <a class="album-card" href="{{ related.get_absolute_url }}">
+      <span class="cover-wrap">
+        {% if related.cover %}
+          <img src="{{ related.cover.url }}" alt="" loading="lazy">
+        {% else %}
+          <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+        {% endif %}
+        <span class="cover-play">▶</span>
+      </span>
+      <b>{{ related.name }}</b><small>{{ related.track_total }} قطعه</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

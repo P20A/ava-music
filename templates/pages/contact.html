@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}تماس با ما | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}تماس با تحریریه {{ site.site_name }}، ارسال اثر و پاسخ پرسش‌های متداول درباره انتشار موسیقی.{% endblock %}
+
+{% block page_name %}contact{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>تماس با ما</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">CONTACT · تماس با ما</span>
+    <h1>با ما در ارتباط باشید</h1>
+    <p>برای همکاری، تبلیغات، گزارش تخلف یا هر سوالی، از فرم زیر استفاده کنید.</p>
+  </div>
+</section>
+
+<div class="wrap page-layout">
+  <section class="main-column">
+    <section class="panel" id="contact-form">
+      <div class="panel-head"><h2>فرم تماس</h2><span>پیام شما مستقیماً به تیم تحریریه می‌رسد</span></div>
+      <form method="post" action="{% url 'core:contact' %}" class="comment-form" data-demo-form>
+        {% csrf_token %}
+        <div class="form-grid">
+          <label class="field">
+            <span>نام شما</span>
+            <input class="input" type="text" name="name" placeholder="نام و نام خانوادگی" value="{{ form.name.value|default:'' }}" required>
+            {% if form.name.errors %}<span class="error">{{ form.name.errors.0 }}</span>{% endif %}
+          </label>
+          <label class="field">
+            <span>ایمیل</span>
+            <input class="input" type="email" name="email" placeholder="email@example.com" value="{{ form.email.value|default:'' }}" required>
+            {% if form.email.errors %}<span class="error">{{ form.email.errors.0 }}</span>{% endif %}
+          </label>
+          <label class="field">
+            <span>تلفن (اختیاری)</span>
+            <input class="input" type="tel" name="phone" placeholder="۰۹xxxxxxxxx" value="{{ form.phone.value|default:'' }}">
+          </label>
+          <label class="field">
+            <span>موضوع</span>
+            <select class="input" name="subject" required>
+              <option value="support" {% if form.subject.value == 'support' %}selected{% endif %}>پشتیبانی</option>
+              <option value="advertising" {% if form.subject.value == 'advertising' %}selected{% endif %}>همکاری و تبلیغات</option>
+              <option value="correction" {% if form.subject.value == 'correction' %}selected{% endif %}>اصلاح اطلاعات اثر</option>
+              <option value="report" {% if form.subject.value == 'report' %}selected{% endif %}>گزارش تخلف / حذف محتوا</option>
+              <option value="other" {% if form.subject.value == 'other' %}selected{% endif %}>سایر</option>
+            </select>
+          </label>
+          <label class="field full">
+            <span>پیام شما</span>
+            <textarea class="textarea" name="message" placeholder="پیام خود را اینجا بنویسید..." required>{{ form.message.value|default:'' }}</textarea>
+            {% if form.message.errors %}<span class="error">{{ form.message.errors.0 }}</span>{% endif %}
+          </label>
+        </div>
+        <div class="field-row">
+          <span class="form-note">ایمیل شما منتشر نخواهد شود. معمولاً در کمتر از ۲۴ ساعت پاسخ می‌دهیم.</span>
+          <button class="btn btn-primary" type="submit">ارسال پیام</button>
+        </div>
+        {% if messages %}
+        <div class="form-msg" role="status">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </form>
+    </section>
+
+    <section class="panel" style="margin-top:24px">
+      <div class="panel-head"><h2>پرسش‌های متداول</h2><span>پاسخ‌های سریع به سوالات رایج</span></div>
+      <div class="faq" style="margin-top:16px">
+        <details>
+          <summary>چطور می‌توانم آهنگم را در آوا منتشر کنم؟</summary>
+          <p>از صفحه <a href="{% url 'submissions:create' %}">ارسال اثر</a> فایل‌های صوتی، کاور و اطلاعات اثر را ارسال کنید. تیم ما بررسی و در صورت تایید منتشر می‌کند.</p>
+        </details>
+        <details>
+          <summary>آیا دانلود آهنگ‌ها رایگان است؟</summary>
+          <p>بله، تمام آهنگ‌ها با کیفیت ۱۲۸ و ۳۲۰ کیلوبیت به‌صورت رایگان قابل دانلود هستند.</p>
+        </details>
+        <details>
+          <summary>چطور می‌توانم تبلیغات بگذارم؟</summary>
+          <p>برای همکاری‌های تبلیغاتی از فرم تماس با موضوع «همکاری و تبلیغات» با ما ارتباط بگیرید.</p>
+        </details>
+        <details>
+          <summary>آهنگی کپی‌رایت دارد، چطور گزارش دهم؟</summary>
+          <p>از فرم تماس با موضوع «گزارش تخلف / حذف محتوا» و ارائه مستندات، درخواست حذف را ثبت کنید.</p>
+        </details>
+      </div>
+    </section>
+
+    {% if site.submissions_enabled %}
+    <section class="panel" id="submit" style="margin-top:24px">
+      <div class="panel-head"><h2>ارسال اثر موسیقی</h2><span>آهنگ، آلبوم یا موزیک‌ویدیوی خود را برای انتشار در آوا ارسال کنید</span></div>
+      <a href="{% url 'submissions:create' %}" class="btn btn-primary" style="display:inline-block;">رفتن به فرم ارسال اثر ←</a>
+    </section>
+    {% endif %}
+  </section>
+
+  <aside class="sidebar">
+    <section class="side-box">
+      <div class="side-heading"><h2>اطلاعات تماس</h2><span>+</span></div>
+      <ul class="list-clean">
+        {% if site.contact_email %}
+        <li><span>ایمیل</span><b><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></b></li>
+        {% endif %}
+        {% if site.contact_phone %}
+        <li><span>تلفن</span><b>{{ site.contact_phone }}</b></li>
+        {% endif %}
+        {% if site.address %}
+        <li><span>نشانی</span><b>{{ site.address }}</b></li>
+        {% endif %}
+        {% if site.working_hours %}
+        <li><span>ساعات پاسخ‌گویی</span><b>{{ site.working_hours }}</b></li>
+        {% endif %}
+      </ul>
+    </section>
+    <section class="side-box">
+      <div class="side-heading"><h2>شبکه‌های اجتماعی</h2><span>+</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        {% if site.instagram %}<a href="{{ site.instagram }}" target="_blank" class="btn btn-ghost btn-sm">اینستاگرام</a>{% endif %}
+        {% if site.telegram %}<a href="{{ site.telegram }}" target="_blank" class="btn btn-ghost btn-sm">تلگرام</a>{% endif %}
+        {% if site.twitter %}<a href="{{ site.twitter }}" target="_blank" class="btn btn-ghost btn-sm">ایکس</a>{% endif %}
+        {% if site.youtube %}<a href="{{ site.youtube }}" target="_blank" class="btn btn-ghost btn-sm">یوتیوب</a>{% endif %}
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

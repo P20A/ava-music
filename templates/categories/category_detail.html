@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}{{ category.name }} | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}{% if category.seo_description %}{{ category.seo_description }}{% elif category.description %}{{ category.description }}{% else %}آرشیو آهنگ‌های {{ category.name }} در {{ site.site_name }}؛ با لینک دانلود و پخش آنلاین.{% endif %}{% endblock %}
+
+{% block og_title %}{{ category.name }}{% endblock %}
+{% block og_description %}{{ category.seo_description|default:category.description }}{% endblock %}
+{% block og_image %}{{ category.image.url|default:site.share_image.url }}{% endblock %}
+
+{% block page_name %}category{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'categories:list' %}">دسته‌بندی‌ها</a><i>›</i><b>{{ category.name }}</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">{{ category.get_kind_display }} · {{ category.name }}</span>
+    <h1>{{ category.name }}</h1>
+    {% if category.description %}
+    <p>{{ category.description }}</p>
+    {% endif %}
+  </div>
+  {% if category.image %}
+  <img src="{{ category.image.url }}" alt="{{ category.name }}" style="max-width:200px;border-radius:var(--radius);margin-top:16px;">
+  {% endif %}
+</section>
+
+<div class="toolbar">
+  <span class="spacer"></span>
+  <select class="field-select" onchange="window.location.href=this.value">
+    <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>جدیدترین</option>
+    <option value="?sort=views"{% if current_sort == 'views' %} selected{% endif %}>پربازدیدترین</option>
+    <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>بیشترین پخش</option>
+    <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
+  </select>
+</div>
+
+<div class="song-grid">
+  {% for song in songs %}
+  <article class="song-card" 
+    data-tags="{% for cat in song.categories.all %}{{ cat.name }} {% endfor %}"
+    data-date="{{ song.published_at|date:'Y-m-d' }}"
+    data-views="{{ song.view_count }}"
+    data-title="{{ song.title }}"
+    data-song="{{ song.title }}"
+    data-artist="{{ song.primary_artist.name }}">
+    <a class="song-thumb" href="{{ song.get_absolute_url }}">
+      {% if song.cover_image %}
+        <img src="{{ song.cover_image.url }}" alt="کاور {{ song.title }}" loading="lazy">
+      {% else %}
+        <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+      {% endif %}
+      <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+    </a>
+    <div class="song-card-body">
+      <div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date_short }}</time></div>
+      <h3><a href="{{ song.get_absolute_url }}">{{ song.title }} — {{ song.primary_artist.name }}</a></h3>
+      <p>{{ song.short_description }}</p>
+      <div class="card-foot"><span>خواننده: <b>{{ song.primary_artist.name }}</b></span><a class="read-more" href="{{ song.get_absolute_url }}">دانلود <b>←</b></a></div>
+    </div>
+  </article>
+  {% empty %}
+  <p class="empty-state">هیچ آهنگی در این دسته‌بندی یافت نشد.</p>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+  {% endif %}
+  {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <a class="page-active" href="#">{{ num }}</a>
+    {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+    <a href="?page={{ num }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+  {% endif %}
+</div>
+
+{% if children %}
+<section class="content-section" style="margin-top:32px">
+  <div class="section-title"><div><span>زیرشاخه‌ها</span><h2>دسته‌بندی‌های مرتبط</h2></div></div>
+  <div class="category-links">
+    {% for child in children %}
+    <a href="{{ child.get_absolute_url }}"><span>{{ child.icon|default:"♪" }}</span> {{ child.name }} <b>{{ child.song_count }}</b></a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

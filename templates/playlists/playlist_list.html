@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}پلی‌لیست‌ها | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}پلی‌لیست‌های منتخب موسیقی در {{ site.site_name }}؛ برای شنیدن مداوم و کشف آهنگ‌های جدید.{% endblock %}
+
+{% block page_name %}playlists{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>پلی‌لیست‌ها</b></nav>
+
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">PLAYLISTS · پلی‌لیست‌های آوا</span>
+    <h1>پلی‌لیست‌ها</h1>
+    <p>مجموعه‌های انتقادی برای هر حال‌وهوا و مناسبت.</p>
+  </div>
+</section>
+
+<div class="toolbar">
+  <span class="spacer"></span>
+  <select class="field-select" onchange="window.location.href=this.value">
+    <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>جدیدترین</option>
+    <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>پربازدیدترین</option>
+    <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
+  </select>
+</div>
+
+<div class="album-grid">
+  {% for playlist in playlists %}
+  <a class="album-card" href="{{ playlist.get_absolute_url }}">
+    <span class="cover-wrap">
+      {% if playlist.cover %}
+        <img src="{{ playlist.cover.url }}" alt="{{ playlist.name }}" loading="lazy">
+      {% else %}
+        <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+      {% endif %}
+      <span class="cover-play">▶</span>
+    </span>
+    <b>{{ playlist.name }}</b>
+    <small>{% if playlist.owner %}{{ playlist.owner.display_name }}{% else %}تیم آوا{% endif %} · {{ playlist.track_total }} قطعه · {{ playlist.total_duration|fa_duration }}</small>
+  </a>
+  {% empty %}
+  <p class="empty-state">هیچ پلی‌لیستی یافت نشد.</p>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if playlists.has_previous %}
+  <a href="?page={{ playlists.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+  {% endif %}
+  {% for num in playlists.paginator.page_range %}
+    {% if playlists.number == num %}
+    <a class="page-active" href="#">{{ num }}</a>
+    {% elif num > playlists.number|add:-3 and num < playlists.number|add:3 %}
+    <a href="?page={{ num }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if playlists.has_next %}
+  <a href="?page={{ playlists.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+  {% endif %}
+</div>
+{% endblock %}

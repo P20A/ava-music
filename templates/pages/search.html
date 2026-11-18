@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static i18n humanize persian_filters %}
+
+{% block title %}جستجو{% if query %} برای «{{ query }}»{% endif %} | {{ site.site_name }}{% endblock %}
+
+{% block meta_description %}جستجو در آرشیو {{ site.site_name }}؛ آهنگ، آلبوم و خواننده موردنظر خود را پیدا کنید.{% endblock %}
+
+{% block page_name %}search{% endblock %}
+
+{% block content %}
+<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>جستجو</b></nav>
+
+<section class="search-page-hero">
+  <div>
+    <span class="eyebrow" style="font-size:10px;color:var(--periwinkle);font-weight:800">SEARCH · جستجو در آرشیو</span>
+    <h1>دنبال چه آهنگی هستی؟</h1>
+    <p>نام خواننده، آهنگ یا آلبوم را بنویس. نتایج در همین صفحه نمایش داده می‌شوند.</p>
+  </div>
+  <form class="big-search" id="searchPageForm" role="search" action="{% url 'core:search' %}">
+    <input id="searchPageInput" type="search" name="q" placeholder="مثلاً: شب بارونی، آرمان راد، آلبوم..." aria-label="جستجوی آرشیو" value="{{ query }}">
+    <button type="submit" aria-label="جستجو">⌕</button>
+  </form>
+  <div class="suggest-row">
+    <span>پیشنهاد:</span>
+    <a href="{% url 'core:search' %}?q=شب+بارونی" data-suggest="شب بارونی">شب بارونی</a>
+    <a href="{% url 'core:search' %}?q=آرمان+راد" data-suggest="آرمان راد">آرمان راد</a>
+    <a href="{% url 'core:search' %}?q=ریمیکس" data-suggest="ریمیکس">ریمیکس</a>
+    <a href="{% url 'core:search' %}?q=آلبوم" data-suggest="آلبوم">آلبوم</a>
+    <a href="{% url 'core:search' %}?q=سنتی" data-suggest="سنتی">سنتی</a>
+  </div>
+</section>
+
+<div class="results-head">
+  <h2 id="searchHeading">{% if query %}نتایج جستجو برای «{{ query }}»{% else %}همه انتشارها{% endif %}</h2>
+  <span id="resultCount">{{ result_count }} نتیجه</span>
+</div>
+
+<div class="song-grid" id="resultGrid">
+  {% for song in songs %}
+  <article class="song-card" data-tags="{% for cat in song.categories.all %}{{ cat.name }} {% endfor %}">
+    <a class="song-thumb" href="{{ song.get_absolute_url }}">
+      {% if song.cover_image %}
+        <img src="{{ song.cover_image.url }}" alt="{{ song.title }}" loading="lazy">
+      {% else %}
+        <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+      {% endif %}
+      <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+    </a>
+    <div class="song-card-body">
+      <div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date_short }}</time></div>
+      <h3><a href="{{ song.get_absolute_url }}">{{ song.title }} — {{ song.primary_artist.name }}</a></h3>
+      <p>{{ song.short_description }}</p>
+      <div class="card-foot"><span>خواننده: <b>{{ song.primary_artist.name }}</b></span><a class="read-more" href="{{ song.get_absolute_url }}">دانلود <b>←</b></a></div>
+    </div>
+  </article>
+  {% empty %}
+  <p class="empty-state">هیچ نتیجه‌ای یافت نشد.</p>
+  {% endfor %}
+</div>
+
+<div class="empty-state" id="searchEmpty" style="display:none;"><b>نتیجه‌ای پیدا نشد</b>املای عبارت را بررسی کنید یا یکی از پیشنهادهای بالا را انتخاب کنید.</div>
+
+<div class="section-cta"><a class="btn btn-ghost" href="{% url 'core:archive' %}">مرور کامل آرشیو آهنگ‌ها ←</a></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.avaSearchData = {
+  query: "{{ query|escapejs }}",
+  resultCount: {{ result_count }}
+};
+</script>
+{% endblock %}

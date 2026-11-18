@@ -1,0 +1,33 @@
+{% load static persian_filters %}
+{% for song in items %}
+<article class="song-card" 
+  data-tags="{% for cat in song.categories.all %}{{ cat.name }} {% endfor %}"
+  data-date="{{ song.published_at|date:'Y-m-d' }}"
+  data-views="{{ song.view_count }}"
+  data-title="{{ song.title }}"
+  data-song="{{ song.title }}"
+  data-artist="{{ song.primary_artist.name }}">
+  <a class="song-thumb" href="{{ song.get_absolute_url }}">
+    {% if song.cover_image %}
+      <img src="{{ song.cover_image.url }}" alt="کاور {{ song.title }}" loading="lazy">
+    {% else %}
+      <img src="{% static 'images/cover-1.svg' %}" alt="" loading="lazy">
+    {% endif %}
+    <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}">▶</span>
+  </a>
+  <div class="song-card-body">
+    <div class="post-meta">
+      <span class="tag">{% if song.is_featured %}ویژه{% else %}آهنگ جدید{% endif %}</span>
+      <time>{{ song.release_date|fa_date_short }}</time>
+    </div>
+    <h3><a href="{{ song.get_absolute_url }}">{{ song.title }} — {{ song.primary_artist.name }}</a></h3>
+    <p>{{ song.short_description }}</p>
+    <div class="card-foot">
+      <span>خواننده: <b>{{ song.primary_artist.name }}</b></span>
+      <a class="read-more" href="{{ song.get_absolute_url }}">دانلود <b>←</b></a>
+    </div>
+  </div>
+</article>
+{% empty %}
+<p class="empty-state">هیچ آهنگی برای نمایش وجود ندارد.</p>
+{% endfor %}

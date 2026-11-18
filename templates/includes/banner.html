@@ -1,0 +1,17 @@
+{% if banner %}
+<div class="home-banner" style="position:relative;overflow:hidden;border-radius:var(--radius);margin-bottom:24px;">
+  {% if banner.image %}
+    <img src="{{ banner.image.url }}" alt="{{ banner.title }}" style="width:100%;height:auto;display:block;">
+  {% endif %}
+  {% if banner.link_url %}
+  <a href="{{ banner.link_url }}" class="banner-link" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-decoration:none;color:white;padding:20px;text-align:center;">
+    <span class="banner-label" style="font-size:12px;background:rgba(0,0,0,0.6);padding:4px 12px;border-radius:20px;margin-bottom:8px;">{{ banner.label }}</span>
+    <span class="banner-title" style="font-size:clamp(20px,4vw,36px);font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,0.5);">{{ banner.title }}</span>
+    {% if banner.subtitle %}
+    <span class="banner-subtitle" style="font-size:clamp(14px,2vw,18px);margin-top:8px;opacity:0.9;">{{ banner.subtitle }}</span>
+    {% endif %}
+    <span class="banner-btn" style="margin-top:16px;padding:10px 24px;background:var(--primary);color:white;border-radius:999px;font-weight:700;font-size:14px;">{{ banner.link_label }}</span>
+  </a>
+  {% endif %}
+</div>
+{% endif %}
