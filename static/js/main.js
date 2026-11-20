@@ -22,9 +22,12 @@
 
   function labelTheme() {
     const dark = root.dataset.theme === "dark";
-    if (themeBtn) themeBtn.innerHTML = dark ? "☼ <span>حالت روشن</span>" : "☾ <span>حالت تیره</span>";
-    if (themeColor) themeColor.setAttribute("content", dark ? "#091540" : "#f2f5fc");
-    if (themeBtn) themeBtn.setAttribute("aria-pressed", String(!dark));
+    if (themeBtn) {
+      themeBtn.setAttribute("aria-checked", String(dark));
+      themeBtn.setAttribute("aria-label", dark ? "حالت روز" : "حالت شب");
+      themeBtn.title = dark ? "روشن کردن" : "تیره کردن";
+    }
+    if (themeColor) themeColor.setAttribute("content", dark ? "#091540" : "#f9dbba");
   }
   labelTheme();
   if (themeBtn) {

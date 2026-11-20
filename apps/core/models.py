@@ -59,7 +59,7 @@ class SiteSettings(models.Model):
     default_keywords = models.CharField("کلمات کلیدی پیش‌فرض", max_length=300, blank=True)
     google_analytics_id = models.CharField("شناسه Google Analytics", max_length=60, blank=True)
     theme_color = models.CharField("رنگ نوار مرورگر", max_length=20, default="#091540")
-    default_theme = models.CharField("پوسته پیش‌فرض", max_length=20, choices=[("light", "روشن"), ("dark", "تیره")], default="dark")
+    default_theme = models.CharField("پوسته پیش‌فرض", max_length=20, choices=[("light", "روشن"), ("dark", "تیره")], default="light")
     posts_per_page = models.PositiveSmallIntegerField("تعداد آیتم در هر صفحه", default=12)
 
     ads_enabled = models.BooleanField("نمایش تبلیغات", default=True)
