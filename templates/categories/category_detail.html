@@ -15,19 +15,6 @@
 <div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'categories:list' %}">دسته‌بندی‌ها</a><i>›</i><b>{{ category.name }}</b></nav>
 
-<section class="page-hero">
-  <div>
-    <span class="eyebrow">{{ category.get_kind_display }} · {{ category.name }}</span>
-    <h1>{{ category.name }}</h1>
-    {% if category.description %}
-    <p>{{ category.description }}</p>
-    {% endif %}
-  </div>
-  {% if category.image %}
-  <img src="{{ category.image.url }}" alt="{{ category.name }}" style="max-width:200px;border-radius:var(--radius);margin-top:16px;">
-  {% endif %}
-</section>
-
 <div class="toolbar">
   <span class="spacer"></span>
   <select class="field-select" onchange="window.location.href=this.value">
@@ -94,4 +81,18 @@
 </section>
 {% endif %}
 </div>
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">{{ category.get_kind_display }} · {{ category.name }}</span>
+    <h1>{{ category.name }}</h1>
+    {% if category.description %}
+    <p>{{ category.description }}</p>
+    {% endif %}
+  </div>
+  {% if category.image %}
+  <img src="{{ category.image.url }}" alt="{{ category.name }}" style="max-width:200px;border-radius:var(--radius);margin-top:16px;">
+  {% endif %}
+</section>
+
+
 {% endblock %}

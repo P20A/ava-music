@@ -11,19 +11,6 @@
 <div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>خوانندگان</b></nav>
 
-<section class="page-hero">
-  <div>
-    <span class="eyebrow">ARTISTS · هنرمندان آوا</span>
-    <h1>خوانندگان و هنرمندان</h1>
-    <p>پروفایل خوانندگان محبوب و تازه‌کار، همراه با آهنگ‌ها، آلبوم‌ها و آمار پخش. هنرمند موردعلاقه‌ات را پیدا کن و دنبال کن.</p>
-  </div>
-  <div class="hero-stats">
-    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>خواننده فعال</small></div>
-    <div class="hero-stat"><b>{{ total_albums|fa_number }}</b><small>آلبوم</small></div>
-    <div class="hero-stat"><b>{{ total_songs|fa_number }}</b><small>آهنگ</small></div>
-  </div>
-</section>
-
 <div class="toolbar">
   <span class="page-info">صفحه {{ page_obj.number|fa_number }} از {{ paginator.num_pages|fa_number }} · {{ paginator.count|fa_number }} خواننده</span>
   <span class="spacer"></span>
@@ -81,4 +68,18 @@
   <a class="btn btn-sm" href="{% url 'submissions:create' %}">ارسال اثر ←</a>
 </section>
 </div>
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">ARTISTS · هنرمندان آوا</span>
+    <h1>خوانندگان و هنرمندان</h1>
+    <p>پروفایل خوانندگان محبوب و تازه‌کار، همراه با آهنگ‌ها، آلبوم‌ها و آمار پخش. هنرمند موردعلاقه‌ات را پیدا کن و دنبال کن.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>خواننده فعال</small></div>
+    <div class="hero-stat"><b>{{ total_albums|fa_number }}</b><small>آلبوم</small></div>
+    <div class="hero-stat"><b>{{ total_songs|fa_number }}</b><small>آهنگ</small></div>
+  </div>
+</section>
+
+
 {% endblock %}

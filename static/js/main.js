@@ -518,10 +518,15 @@
       }
       return;
     }
-    const map = { special: "ویژه", remix: "ریمیکس", video: "موزیک ویدیو" };
-    const label = map[key];
-    if (!label) return;
-    const chip = $$("[data-filter]").filter(function (c) { return c.dataset.filter === label; })[0];
+    const map = { special: "all", remix: "remix", video: "all" };
+    const target = map[key];
+    if (target === "all") {
+      const allChip = $$("[data-filter]").filter(function (c) { return c.dataset.filter === "all"; })[0];
+      if (allChip) allChip.click();
+      return;
+    }
+    if (!target) return;
+    const chip = $$("[data-filter]").filter(function (c) { return c.dataset.filter === target; })[0];
     if (chip) chip.click();
   }
   applyHashFilter();

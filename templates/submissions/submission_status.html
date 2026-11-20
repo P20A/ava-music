@@ -9,14 +9,6 @@
 <div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>پیگیری ارسال</b></nav>
 
-<section class="page-hero">
-  <div>
-    <span class="eyebrow">STATUS · وضعیت ارسال</span>
-    <h1>پیگیری وضعیت اثر</h1>
-    <p>شماره پیگیری: <code>{{ submission.token }}</code></p>
-  </div>
-</section>
-
 <div class="wrap" style="max-width:700px;">
   <div class="panel">
     <div class="panel-head"><h2>اطلاعات اثر</h2></div>
@@ -91,4 +83,13 @@
   </div>
 </div>
 </div>
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">STATUS · وضعیت ارسال</span>
+    <h1>پیگیری وضعیت اثر</h1>
+    <p>شماره پیگیری: <code>{{ submission.token }}</code></p>
+  </div>
+</section>
+
+
 {% endblock %}

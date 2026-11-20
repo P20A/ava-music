@@ -6,9 +6,8 @@
 {% block page_name %}followed_artists{% endblock %}
 
 {% block content %}
-<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>دنبال‌کنندگان</b></nav>
-
 <div class="wrap page-layout">
+  <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>دنبال‌کنندگان</b></nav>
   <section class="main-column">
     <section class="panel">
       <div class="panel-head"><h2>هنرمندانی که دنبال می‌کنم</h2><span>{{ followed.count }} هنرمند</span></div>

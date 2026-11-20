@@ -8,28 +8,25 @@
 {% block page_name %}archive{% endblock %}
 
 {% block content %}
-<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آرشیو آهنگ‌ها</b></nav>
-
-<section class="page-hero">
-  <div>
-    <span class="eyebrow">AVA ARCHIVE · آرشیو انتشارها</span>
-    <h1>آرشیو آهنگ‌ها</h1>
-    <p>همه انتشارهای تازه و محبوب، مرتب‌شده بر اساس تاریخ. با فیلتر سبک و مرتب‌سازی دلخواه، سریع‌تر به آهنگ موردنظرت برس.</p>
-    <div class="toolbar" style="margin-bottom:0">
-      <a class="btn btn-primary btn-sm" href="{% url 'core:archive' %}">آهنگ جدید</a>
-      <a class="btn btn-ghost btn-sm" href="{% url 'albums:list' %}">آلبوم‌ها</a>
-      <a class="btn btn-ghost btn-sm" href="{% url 'artists:list' %}">خوانندگان</a>
-    </div>
-  </div>
-  <div class="hero-stats">
-    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>آهنگ منتشرشده</small></div>
-    <div class="hero-stat"><b>{{ categories.count }}</b><small>دسته‌بندی</small></div>
-    <div class="hero-stat"><b>{{ artists.count|default:0 }}</b><small>خواننده</small></div>
-  </div>
-</section>
-
-<div class="wrap page-layout">
   <section class="main-column">
+    <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آرشیو آهنگ‌ها</b></nav>
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">AVA ARCHIVE · آرشیو انتشارها</span>
+        <h1>آرشیو آهنگ‌ها</h1>
+        <p>همه انتشارهای تازه و محبوب، مرتب‌شده بر اساس تاریخ. با فیلتر سبک و مرتب‌سازی دلخواه، سریع‌تر به آهنگ موردنظرت برس.</p>
+        <div class="toolbar" style="margin-bottom:0">
+          <a class="btn btn-primary btn-sm" href="{% url 'core:archive' %}">آهنگ جدید</a>
+          <a class="btn btn-ghost btn-sm" href="{% url 'albums:list' %}">آلبوم‌ها</a>
+          <a class="btn btn-ghost btn-sm" href="{% url 'artists:list' %}">خوانندگان</a>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>آهنگ منتشرشده</small></div>
+        <div class="hero-stat"><b>{{ categories.count }}</b><small>دسته‌بندی</small></div>
+        <div class="hero-stat"><b>{{ artists.count|default:0 }}</b><small>خواننده</small></div>
+      </div>
+    </section>
     <div class="toolbar" data-filter-group data-filter-target="#archiveView" data-empty="#archiveEmpty">
       <div class="chip-row" id="new">
         <button class="chip {% if not current_category %}active{% endif %}" data-filter="all">همه</button>
@@ -54,7 +51,7 @@
       <div class="song-grid" id="songGrid">
         {% for song in songs %}
         <article class="song-card" 
-          data-tags="{% for cat in song.categories.all %}{{ cat.name }} {% endfor %}"
+          data-tags="{% for cat in song.categories.all %}{{ cat.slug }} {% endfor %}"
           data-date="{{ song.published_at|date:'Y-m-d' }}"
           data-views="{{ song.view_count }}"
           data-title="{{ song.title }}"
@@ -82,7 +79,7 @@
 
       <div class="post-list" id="compactList" hidden>
         {% for song in songs %}
-        <article class="music-post" data-tags="{% for cat in song.categories.all %}{{ cat.name }} {% endfor %}" data-date="{{ song.published_at|date:'Y-m-d' }}" data-views="{{ song.view_count }}" data-title="{{ song.title }}" data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}">
+        <article class="music-post" data-tags="{% for cat in song.categories.all %}{{ cat.slug }} {% endfor %}" data-date="{{ song.published_at|date:'Y-m-d' }}" data-views="{{ song.view_count }}" data-title="{{ song.title }}" data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}">
           <a class="post-cover" href="{{ song.get_absolute_url }}">
             {% if song.cover_image %}
               <img src="{{ song.cover_image.url }}" alt="" loading="lazy">
@@ -152,5 +149,8 @@
     </section>
     <section class="side-promo"><span>AVA MUSIC</span><b>موسیقی خوب<br>همیشه همراهته.</b><small>کشف کن، گوش بده، لذت ببر.</small></section>
   </aside>
-</div>
+
+
+
+  
 {% endblock %}

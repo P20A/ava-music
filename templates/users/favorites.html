@@ -6,9 +6,8 @@
 {% block page_name %}favorites{% endblock %}
 
 {% block content %}
-<nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>آهنگ‌های پسندیده</b></nav>
-
 <div class="wrap page-layout">
+  <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>آهنگ‌های پسندیده</b></nav>
   <section class="main-column">
     <section class="panel">
       <div class="panel-head"><h2>آهنگ‌های پسندیده</h2><span>{{ likes.count }} آهنگ</span></div>

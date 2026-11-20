@@ -98,7 +98,7 @@
         {% if not header_links %}
         <a href="{% url 'core:home' %}" {% if request.path == '/' %}class="current"{% endif %}>صفحه اصلی</a>
         <a href="{% url 'core:archive' %}" {% if '/archive' in request.path %}class="current"{% endif %}>آهنگ جدید</a>
-        <a href="{% url 'core:archive' %}#special">آهنگ ویژه</a>
+        <!-- <a href="{% url 'core:archive' %}#special">آهنگ ویژه</a> -->
         <a href="{% url 'core:archive' %}#remix">ریمیکس</a>
         <a href="{% url 'albums:list' %}" {% if '/albums' in request.path %}class="current"{% endif %}>آلبوم</a>
         <a href="{% url 'core:archive' %}#video">موزیک ویدیو</a>

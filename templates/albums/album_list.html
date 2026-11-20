@@ -11,18 +11,6 @@
 <div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آلبوم‌ها</b></nav>
 
-<section class="page-hero">
-  <div>
-    <span class="eyebrow">ALBUMS · آلبوم‌های آوا</span>
-    <h1>آلبوم‌ها و پلی‌لیست‌ها</h1>
-    <p>مجموعه‌های کامل موسیقی، آلبوم‌های رسمی، ای‌پی‌ها و پلی‌لیست‌های منتخب برای شنیدن مداوم.</p>
-  </div>
-  <div class="hero-stats">
-    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>آلبوم</small></div>
-    <div class="hero-stat"><b>{{ playlist_total|fa_number }}</b><small>پلی‌لیست</small></div>
-  </div>
-</section>
-
 <div class="toolbar">
   <div class="chip-row">
     <a class="chip {% if not current_type %}active{% endif %}" href="?sort={{ current_sort }}">همه</a>
@@ -103,4 +91,17 @@
 </div>
 {% endif %}
 </div>
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">ALBUMS · آلبوم‌های آوا</span>
+    <h1>آلبوم‌ها و پلی‌لیست‌ها</h1>
+    <p>مجموعه‌های کامل موسیقی، آلبوم‌های رسمی، ای‌پی‌ها و پلی‌لیست‌های منتخب برای شنیدن مداوم.</p>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>آلبوم</small></div>
+    <div class="hero-stat"><b>{{ playlist_total|fa_number }}</b><small>پلی‌لیست</small></div>
+  </div>
+</section>
+
+
 {% endblock %}

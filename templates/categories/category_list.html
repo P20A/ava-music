@@ -11,14 +11,6 @@
 <div class="main-column span-all">
 <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><b>دسته‌بندی‌ها</b></nav>
 
-<section class="page-hero">
-  <div>
-    <span class="eyebrow">CATEGORIES · دسته‌بندی‌های آوا</span>
-    <h1>سبک‌ها و دسته‌بندی‌ها</h1>
-    <p>موسیقی را بر اساس سبک، حال‌وهوا یا زبان کشف کنید.</p>
-  </div>
-</section>
-
 <div class="category-grid">
   {% for category in categories %}
   <a href="{{ category.get_absolute_url }}" class="category-card" style="display:block;text-decoration:none;color:inherit;">
@@ -40,4 +32,13 @@
   {% endfor %}
 </div>
 </div>
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">CATEGORIES · دسته‌بندی‌های آوا</span>
+    <h1>سبک‌ها و دسته‌بندی‌ها</h1>
+    <p>موسیقی را بر اساس سبک، حال‌وهوا یا زبان کشف کنید.</p>
+  </div>
+</section>
+
+
 {% endblock %}
