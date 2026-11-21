@@ -38,7 +38,3 @@ Environment variables (`.env`): `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `DATABAS
 python manage.py check
 python manage.py test
 ```
-
-## Deploy (ParsPack PaaS)
-
-Set env vars, run `python manage.py migrate`, collectstatic, then `gunicorn project.wsgi`.
