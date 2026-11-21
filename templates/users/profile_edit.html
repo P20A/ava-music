@@ -13,22 +13,50 @@
   <section class="panel" style="margin-top:40px;">
     <div class="panel-head"><h2>ویرایش پروفایل</h2></div>
     
-    <form method="post" action="{% url 'users:profile_edit' %}" enctype="multipart/form-data" class="comment-form" data-demo-form>
+    <form method="post" action="{% url 'users:profile_edit' %}" enctype="multipart/form-data" class="comment-form">
       {% csrf_token %}
       
       <div class="form-grid">
-        <label class="field full" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <span>تصویر پروفایل</span>
-          {% if form.avatar.value %}
-          <img src="{{ form.avatar.value.url }}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+      <div class="avatar-uploader" data-upload-url="{% url 'users:profile_picture' %}" style="grid-column:1/-1;">
+        <div class="avatar-circle" tabindex="0" role="button" aria-label="Update profile picture">
+          {% if request.user.avatar %}
+          <img src="{{ request.user.avatar.url }}" alt="" class="avatar-img avatar-preview">
+          <div class="avatar-placeholder" style="display:none;">
+          {% else %}
+          <img src="" alt="" class="avatar-img avatar-preview" style="display:none;">
+          <div class="avatar-placeholder">
           {% endif %}
-          <input class="file-input" type="file" name="avatar" accept="image/*">
-          <span class="file-name">فایل خود را انتخاب کنید یا اینجا رها کنید</span>
-          {% if form.avatar.errors %}<span class="error">{{ form.avatar.errors.0 }}</span>{% endif %}
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+            </svg>
+          </div>
+          <div class="avatar-overlay">
+            <span class="avatar-overlay-text">Update Profile Picture</span>
+            <svg class="avatar-camera" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </div>
+          <div class="avatar-loading" hidden>
+            <span class="avatar-spinner"></span>
+          </div>
+        </div>
+        <input type="file" class="avatar-input" accept="image/jpeg,image/png,image/webp" hidden>
+        <div class="avatar-actions" hidden>
+          <button type="button" class="btn btn-primary btn-sm avatar-confirm">آپلود</button>
+          <button type="button" class="btn btn-ghost btn-sm avatar-cancel">لغو</button>
+        </div>
+        <p class="avatar-status" role="status"></p>
+      </div>
+        
+        <label class="field full">
+          <span>نام کاربری</span>
+          <input class="input" type="text" name="username" value="{{ form.username.value|default:'' }}" dir="ltr" required>
+          {% if form.username.errors %}<span class="error">{{ form.username.errors.0 }}</span>{% endif %}
         </label>
         
         <label class="field">
-          <span>نام</span>
           <input class="input" type="text" name="first_name" value="{{ form.first_name.value|default:'' }}">
           {% if form.first_name.errors %}<span class="error">{{ form.first_name.errors.0 }}</span>{% endif %}
         </label>
@@ -79,4 +107,97 @@
   </section>
 </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  var uploader = document.querySelector('.avatar-uploader');
+  if(!uploader) return;
+  var circle = uploader.querySelector('.avatar-circle');
+  var input = uploader.querySelector('.avatar-input');
+  var preview = uploader.querySelector('.avatar-preview');
+  var placeholder = uploader.querySelector('.avatar-placeholder');
+  var actions = uploader.querySelector('.avatar-actions');
+  var confirmBtn = uploader.querySelector('.avatar-confirm');
+  var cancelBtn = uploader.querySelector('.avatar-cancel');
+  var loading = uploader.querySelector('.avatar-loading');
+  var status = uploader.querySelector('.avatar-status');
+  var url = uploader.getAttribute('data-upload-url');
+  var currentSrc = preview && preview.getAttribute('src') ? preview.getAttribute('src') : '';
+  var objectUrl = null;
+  var uploading = false;
+
+  function setStatus(msg, isError){
+    status.textContent = msg || '';
+    status.style.color = isError ? '#c0392b' : 'var(--muted)';
+  }
+
+  circle.addEventListener('click', function(){ if(!uploading) input.click(); });
+  circle.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); if(!uploading) input.click(); }
+  });
+
+  input.addEventListener('change', function(){
+    var file = input.files && input.files[0];
+    if(!file) return;
+    if(['image/jpeg','image/png','image/webp'].indexOf(file.type) === -1){ setStatus('???? ????? ???? ????.', true); input.value=''; return; }
+    if(file.size > 8*1024*1024){ setStatus('??? ????? ??? ?? ? ??????? ???.', true); input.value=''; return; }
+    if(objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = URL.createObjectURL(file);
+    if(preview){ preview.src = objectUrl; preview.style.display = 'block'; }
+    if(placeholder) placeholder.style.display = 'none';
+    actions.hidden = false;
+    setStatus('???? ????? ????? ???? ?? ??? ????.');
+  });
+
+  cancelBtn.addEventListener('click', function(){
+    if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl = null; }
+    input.value = '';
+    if(preview){
+      if(currentSrc){ preview.src = currentSrc; preview.style.display = 'block'; }
+      else { preview.style.display = 'none'; }
+    }
+    if(!currentSrc && placeholder) placeholder.style.display = 'grid';
+    actions.hidden = true;
+    setStatus('');
+  });
+
+  confirmBtn.addEventListener('click', async function(){
+    var file = input.files && input.files[0];
+    if(!file || uploading) return;
+    uploading = true;
+    confirmBtn.disabled = true;
+    cancelBtn.disabled = true;
+    loading.hidden = false;
+    setStatus('?? ??? ?????...');
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    var csrf = csrfMeta ? csrfMeta.content : '';
+    var fd = new FormData();
+    fd.append('avatar', file);
+    try {
+      var res = await fetch(url, { method:'POST', headers:{'X-CSRFToken':csrf}, body:fd, credentials:'same-origin' });
+      var data = await res.json();
+      if(res.ok && data.success){
+        currentSrc = data.url;
+        if(preview){ preview.src = data.url; preview.style.display = 'block'; }
+        if(placeholder) placeholder.style.display = 'none';
+        if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl = null; }
+        input.value = '';
+        actions.hidden = true;
+        setStatus('????? ??????? ?? ?????? ??????????? ??.');
+      } else {
+        setStatus((data && data.error) ? data.error : '????? ?????? ???.', true);
+      }
+    } catch(e) {
+      setStatus('??? ?? ?????? ?? ????.', true);
+    } finally {
+      uploading = false;
+      confirmBtn.disabled = false;
+      cancelBtn.disabled = false;
+      loading.hidden = true;
+    }
+  });
+})();
+</script>
 {% endblock %}

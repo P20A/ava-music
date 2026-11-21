@@ -48,7 +48,7 @@ html[data-theme=dark] .remix-tag{background:#abd2fa2e;color:#d6e8ff}
 html[data-theme=dark] .side-promo{border:1px solid var(--line)}
 .footer-links a:hover{color:var(--ice)}
 
-.crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:7px;padding-top:6px;color:var(--muted);font-size:10px}
+.crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:7px;padding-top:6px; padding-bottom: 20px; color:var(--muted);font-size:10px}
 .crumbs a{font-weight:600}
 .crumbs a:hover{color:var(--link)}
 .crumbs i{font-style:normal;opacity:.5}
@@ -454,3 +454,24 @@ html[data-theme=dark] .rank{background:#7692ff1f}
 @media(max-width:480px){
   .album-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* =========================================================
+   circular avatar uploader
+   ========================================================= */
+.avatar-uploader { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.avatar-circle { position:relative; width:150px; height:150px; border-radius:50%; overflow:hidden; cursor:pointer; border:2px solid var(--line); background:var(--paper2); display:grid; place-items:center; transition:transform .2s, box-shadow .2s; }
+.avatar-circle:hover { transform:scale(1.02); box-shadow:0 10px 30px rgba(0,0,0,.18); }
+.avatar-circle:focus-visible { outline:3px solid var(--royal); outline-offset:4px; }
+.avatar-img { width:100%; height:100%; object-fit:cover; }
+.avatar-placeholder { width:100%; height:100%; display:grid; place-items:center; color:var(--muted); background:var(--paper2); }
+.avatar-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:rgba(0,0,0,.55); color:#fff; opacity:0; transition:opacity .25s ease; text-align:center; padding:12px; }
+.avatar-circle:hover .avatar-overlay, .avatar-circle:focus .avatar-overlay { opacity:1; }
+.avatar-overlay-text { font-size:11px; font-weight:700; line-height:1.4; }
+.avatar-camera { opacity:.9; }
+.avatar-loading { position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.6); }
+.avatar-loading[hidden] { display:none; }
+.avatar-spinner { width:26px; height:26px; border:3px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:avatar-spin .8s linear infinite; }
+@keyframes avatar-spin { to { transform:rotate(360deg); } }
+.avatar-actions { display:flex; gap:8px; }
+.avatar-actions[hidden] { display:none; }
+.avatar-status { font-size:10px; color:var(--muted); text-align:center; min-height:14px; margin:0; }

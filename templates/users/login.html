@@ -13,9 +13,9 @@
   <section class="panel" style="margin-top:40px;">
     <div class="panel-head" style="text-align:center;"><h2>ورود به حساب کاربری</h2></div>
     
-    <form method="post" action="{% url 'users:login' %}" class="comment-form" data-demo-form>
+    <form method="post" action="{% url 'users:login' %}" class="comment-form">
       {% csrf_token %}
-      <input type="hidden" name="next" value="{{ request.GET.next|default:'{% url \"users:profile\" %}' }}">
+      <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
       
       <div class="form-grid">
         <label class="field full">

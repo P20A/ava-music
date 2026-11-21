@@ -13,7 +13,7 @@
   <section class="panel" style="margin-top:40px;">
     <div class="panel-head" style="text-align:center;"><h2>ساخت حساب کاربری جدید</h2></div>
     
-    <form method="post" action="{% url 'users:register' %}" class="comment-form" data-demo-form>
+    <form method="post" action="{% url 'users:register' %}" class="comment-form">
       {% csrf_token %}
       
       <div class="form-grid">
@@ -49,6 +49,12 @@
         </label>
       </div>
       
+        <label class="field full" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" name="terms" required>
+          <span>قوانین انتشار و حریم خصوصی را می‌پذیرم.</span>
+          {% if form.terms.errors %}<span class="error">{{ form.terms.errors.0 }}</span>{% endif %}
+        </label>
+       
       <div class="field-row">
         <button class="btn btn-primary" type="submit" style="width:100%;padding:14px;">ثبت‌نام</button>
       </div>

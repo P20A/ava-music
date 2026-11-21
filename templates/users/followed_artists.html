@@ -6,9 +6,8 @@
 {% block page_name %}followed_artists{% endblock %}
 
 {% block content %}
-<div class="wrap page-layout">
-  <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>دنبال‌کنندگان</b></nav>
   <section class="main-column">
+      <nav class="crumbs" aria-label="مسیر صفحه"><a href="{% url 'core:home' %}">خانه</a><i>›</i><a href="{% url 'users:profile' %}">پروفایل</a><i>›</i><b>دنبال‌کنندگان</b></nav>
     <section class="panel">
       <div class="panel-head"><h2>هنرمندانی که دنبال می‌کنم</h2><span>{{ followed.count }} هنرمند</span></div>
       
@@ -39,9 +38,13 @@
         <li><a href="{% url 'users:favorites' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">آهنگ‌های پسندیده <span>♥</span></a></li>
         <li><a href="{% url 'users:history' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;">تاریخچه پخش <span>🕐</span></a></li>
         <li><a href="{% url 'users:followed_artists' %}" class="btn btn-primary" style="width:100%;justify-content:space-between;">هنرمندانی که دنبال می‌کنم <span>✦</span></a></li>
-        <li><a href="{% url 'users:logout' %}" class="btn btn-ghost" style="width:100%;justify-content:space-between;color:var(--destructive);">خروج <span>←</span></a></li>
+        <li>
+          <form method="post" action="{% url 'users:logout' %}" style="width:100%;">
+            {% csrf_token %}
+            <button class="btn btn-ghost" type="submit" style="width:100%;justify-content:space-between;color:var(--destructive);">خروج <span>←</span></button>
+          </form>
+        </li>
       </ul>
     </section>
   </aside>
-</div>
 {% endblock %}

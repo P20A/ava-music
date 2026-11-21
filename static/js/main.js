@@ -534,17 +534,14 @@
   $$("[data-view]").forEach(function (button) {
     button.addEventListener("click", function () {
       const toggle = button.closest(".view-toggle");
-      const scope = $((toggle && toggle.dataset.viewScope) || button.dataset.viewScope || "[data-view-scope]");
-      if (!scope) return;
+      const scope = (toggle && toggle.dataset.viewScope) ? $(toggle.dataset.viewScope) : (button.dataset.viewScope ? $(button.dataset.viewScope) : document.querySelector("[data-view-scope]"));
+      const grid = document.getElementById("songGrid") || (scope && $(".song-grid", scope));
+      const list = document.getElementById("compactList") || (scope && $(".post-list", scope));
       $$("[data-view]", button.parentElement).forEach(function (b) { b.classList.remove("active"); });
       button.classList.add("active");
-      const list = $(".post-list", scope);
-      const grid = $(".song-grid", scope);
       const isList = button.dataset.view === "list";
       if (grid) grid.hidden = isList;
       if (list) list.hidden = !isList;
-      const active = $(".chip.active");
-      if (active) active.click();
     });
   });
 

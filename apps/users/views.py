@@ -4,12 +4,13 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView as AuthPasswordChangeView
-from django.shortcuts import redirect
+from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, TemplateView, UpdateView
 
 from apps.core.models import SiteSettings
-from apps.users.forms import LoginForm, ProfileForm, RegisterForm
+from apps.users.forms import AvatarUploadForm, LoginForm, ProfileForm, RegisterForm
 from apps.users.models import User
 
 
@@ -40,6 +41,11 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
     def form_valid(self, form):
+        remember = self.request.POST.get("remember")
+        if not remember:
+            self.request.session.set_expiry(0)
+        else:
+            self.request.session.set_expiry(None)
         messages.success(self.request, "با موفقیت وارد شدید.")
         return super().form_valid(form)
 
@@ -50,7 +56,7 @@ class CustomLoginView(LoginView):
 
 
 class CustomLogoutView(LogoutView):
-    next_page = reverse_lazy("home")
+    next_page = reverse_lazy("core:home")
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):
@@ -63,6 +69,19 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         context["submissions"] = user.submissions.all()[:10] if hasattr(user, "submissions") else []
         context["likes"] = user.song_likes.select_related("song", "song__primary_artist")[:12]
         context["followed_artists"] = user.artist_follows.select_related("artist")[:12]
+        return context
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "users/dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["profile"] = user
+        context["likes_count"] = user.song_likes.count() if hasattr(user, "song_likes") else 0
+        context["submissions_count"] = user.submissions.count() if hasattr(user, "submissions") else 0
+        context["followed_count"] = user.artist_follows.count() if hasattr(user, "artist_follows") else 0
         return context
 
 
@@ -115,6 +134,28 @@ class HistoryView(LoginRequiredMixin, TemplateView):
 
 
 class FollowedArtistsView(LoginRequiredMixin, TemplateView):
+    template_name = "users/followed_artists.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["followed"] = user.artist_follows.select_related("artist").all()
+        return context
+
+
+class ProfilePictureUploadView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        form = AvatarUploadForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            request.user.refresh_from_db()
+            return JsonResponse({"success": True, "url": request.user.avatar.url})
+        errors = form.errors.get("avatar") or form.non_field_errors()
+        message = errors[0] if errors else "آپلود تصویر ناموفق بود."
+        return JsonResponse({"success": False, "error": message}, status=400)
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Method not allowed."}, status=405)
     template_name = "users/followed_artists.html"
 
     def get_context_data(self, **kwargs):

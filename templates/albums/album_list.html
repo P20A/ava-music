@@ -28,8 +28,8 @@
     <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
   </select>
   <div class="view-toggle" role="group" aria-label="حالت نمایش">
-    <button class="active" data-view="grid" aria-label="نمایش شبکه‌ای">▦</button>
-    <button data-view="list" aria-label="نمایش فهرستی">☰</button>
+    <button class="active" onclick="toggleAlbumView('grid')" aria-label="نمایش شبکه‌ای">▦</button>
+    <button onclick="toggleAlbumView('list')" aria-label="نمایش فهرستی">☰</button>
   </div>
 </div>
 
@@ -104,4 +104,23 @@
 </section>
 
 
+{% endblock %}
+{% block extra_js %}
+<script>
+function toggleAlbumView(mode){
+  var grid = document.getElementById('albumGrid');
+  var list = document.getElementById('compactList');
+  var btns = document.querySelectorAll('.view-toggle button');
+  btns.forEach(function(b, idx){ b.classList.remove('active'); if((mode === 'grid' && idx === 0) || (mode === 'list' && idx === 1)) b.classList.add('active'); });
+  if(grid){ if(mode === 'list') grid.setAttribute('hidden',''); else grid.removeAttribute('hidden'); }
+  if(list){ if(mode === 'list') list.removeAttribute('hidden'); else list.setAttribute('hidden',''); }
+  try { localStorage.setItem('albumViewMode', mode); } catch(e){}
+}
+document.addEventListener('DOMContentLoaded', function(){
+  try {
+    var saved = localStorage.getItem('albumViewMode');
+    if(saved === 'list') toggleAlbumView('list');
+  } catch(e){}
+});
+</script>
 {% endblock %}
