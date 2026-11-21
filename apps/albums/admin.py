@@ -15,7 +15,7 @@ class AlbumTrackInline(admin.TabularInline):
 class AlbumAdmin(admin.ModelAdmin):
     list_display = (
         "title", "slug", "cover_preview", "album_type", "release_date",
-        "is_published", "is_featured", "track_total", "total_duration_display", "created_at"
+        "is_published", "is_featured", "total_duration_display", "created_at"
     )
     list_filter = ("album_type", "is_published", "is_featured", "release_date")
     list_editable = ("is_published", "is_featured")

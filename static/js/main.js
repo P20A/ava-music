@@ -491,15 +491,13 @@
         chip.classList.add("active");
         chip.setAttribute("aria-pressed", "true");
         const value = chip.dataset.filter;
-        let visible = 0;
-        if (target) {
-          $$("[data-tags]", target).forEach(function (card) {
-            const match = value === "all" || (card.dataset.tags || "").indexOf(value) !== -1;
-            card.hidden = !match;
-            if (match) visible++;
-          });
-        }
-        if (empty) empty.classList.toggle("show", visible === 0);
+        // reset to first page on the server so the chosen category is actually listed
+        const params = new URLSearchParams(window.location.search);
+        params.set("page", "1");
+        if (value === "all") { params.delete("category"); } else { params.set("category", value); }
+        const sortSel = document.querySelector("[data-sort]");
+        if (sortSel && sortSel.value) params.set("sort", sortSel.value.replace(/^\?sort=/, ""));
+        window.location.href = window.location.pathname + "?" + params.toString();
       });
     });
   });

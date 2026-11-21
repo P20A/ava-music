@@ -78,14 +78,6 @@ class Album(models.Model):
         return reverse("albums:detail", kwargs={"slug": self.slug})
 
     @property
-    def track_total(self) -> int:
-        return self.tracks.count()
-
-    @property
-    def total_duration(self) -> int:
-        return self.tracks.aggregate(total=Sum("song__duration"))["total"] or 0
-
-    @property
     def primary_artist(self):
         return self.artists.first()
 

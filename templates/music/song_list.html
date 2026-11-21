@@ -13,41 +13,92 @@
   <a href="{% url 'core:home' %}">خانه</a><i>›</i><b>آهنگ‌ها</b>
 </nav>
 
-<header class="page-header">
-  <h1>آهنگ‌ها</h1>
-  <p class="lead">کشف و جستجوی آهنگ‌های تازه و محبوب</p>
-</header>
-
-<div class="toolbar" data-filter-group data-filter-target="#songGrid" data-empty="#songEmpty">
-  <div class="chip-row" id="songCategories">
-    <button class="chip active" data-filter="all">همه</button>
-    {% for cat in categories %}
-    <button class="chip" data-filter="{{ cat.name }}">{{ cat.name }}</button>
-    {% endfor %}
+<section class="page-hero">
+  <div>
+    <span class="eyebrow">AVA SONGS · آرشیو آهنگ‌ها</span>
+    <h1>آهنگ‌ها</h1>
+    <p>کشف و جستجوی آهنگ‌های تازه و محبوب با فیلتر سبک و مرتب‌سازی دلخواه.</p>
   </div>
-  <span class="spacer"></span>
-  <select class="field-select" data-sort data-sort-target="#songGrid" aria-label="مرتب‌سازی" onchange="window.location.href=this.value">
-    <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>جدیدترین</option>
-    <option value="?sort=views"{% if current_sort == 'views' %} selected{% endif %}>پربازدیدترین</option>
-    <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>بیشترین پخش</option>
-    <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
-  </select>
-</div>
+  <div class="hero-stats">
+    <div class="hero-stat"><b>{{ paginator.count|fa_number }}</b><small>آهنگ منتشرشده</small></div>
+    <div class="hero-stat"><b>{{ categories.count }}</b><small>دسته‌بندی</small></div>
+  </div>
+</section>
 
-<div class="song-grid" id="songGrid">
-  {% include "includes/song_card.html" with items=songs %}
-</div>
+<div class="wrap page-layout">
+  <section class="main-column">
+    <div class="toolbar" data-filter-group data-filter-target="#archiveView" data-empty="#archiveEmpty">
+      <div class="chip-row" id="new">
+        <button class="chip {% if not current_category %}active{% endif %}" data-filter="all">همه</button>
+        {% for cat in categories %}
+        <button class="chip {% if current_category == cat.slug %}active{% endif %}" data-filter="{{ cat.slug }}">{{ cat.name }}</button>
+        {% endfor %}
+      </div>
+      <span class="spacer"></span>
+      <select class="field-select" data-sort data-sort-target="#songGrid" aria-label="مرتب‌سازی" onchange="window.location.href=this.value">
+        <option value="?sort=newest"{% if current_sort == 'newest' %} selected{% endif %}>جدیدترین</option>
+        <option value="?sort=views"{% if current_sort == 'views' %} selected{% endif %}>پربازدیدترین</option>
+        <option value="?sort=popular"{% if current_sort == 'popular' %} selected{% endif %}>بیشترین پخش</option>
+        <option value="?sort=title"{% if current_sort == 'title' %} selected{% endif %}>ترتیب الفبا</option>
+      </select>
+      <div class="view-toggle" role="group" aria-label="حالت نمایش">
+        <button class="active" data-view="grid" aria-label="نمایش شبکه‌ای">▦</button>
+        <button data-view="list" aria-label="نمایش فهرستی">☰</button>
+      </div>
+    </div>
 
-{% if paginator.num_pages > 1 %}
-<nav class="pagination" aria-label="صفحه‌بندی">
-  {% if page_obj.has_previous %}
-  <a href="?page={{ page_obj.previous_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه قبل">‹ قبلی</a>
-  {% endif %}
-  <span class="page-info">صفحه {{ page_obj.number|fa_number }} از {{ paginator.num_pages|fa_number }}</span>
-  {% if page_obj.has_next %}
-  <a href="?page={{ page_obj.next_page_number }}&sort={{ current_sort }}" class="page-link" aria-label="صفحه بعد">بعدی ›</a>
-  {% endif %}
-</nav>
-{% endif %}
+    <div id="archiveView" data-view-scope>
+      <div class="song-grid" id="songGrid">
+        {% include "includes/song_card.html" with items=songs %}
+      </div>
+      <div class="post-list" id="compactList" hidden>
+        {% for song in songs %}
+        <article class="music-post" data-tags="{% for cat in song.categories.all %}{{ cat.slug }} {% endfor %}" data-date="{{ song.published_at|date:'Y-m-d' }}" data-views="{{ song.view_count }}" data-title="{{ song.title }}" data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}">
+          <a class="post-cover" href="{{ song.get_absolute_url }}">
+            {% if song.cover_image %}
+              <img src="{{ song.cover_image.url }}" alt="" loading="lazy">
+            {% else %}
+              <img src="{% static 'images/cover-1.svg' %}" alt="">
+            {% endif %}
+            <span class="cover-play" data-play data-song="{{ song.title }}" data-artist="{{ song.primary_artist.name }}" data-duration="{{ song.duration }}"{% if song.is_playable %} data-stream="{% url 'music:stream' slug=song.slug %}"{% endif %}>▶</span>
+          </a>
+          <div class="post-body"><div class="post-meta"><span class="tag">{{ song.tag_label }}</span><time>{{ song.release_date|fa_date }}</time><span>{{ song.view_count|fa_number }} بازدید</span></div><h3><a href="{{ song.get_absolute_url }}">{{ song.title }} — {{ song.primary_artist.name }}</a></h3><p>{{ song.short_description }}</p><div class="post-bottom"><span>خواننده: <b>{{ song.primary_artist.name }}</b></span><a href="{{ song.get_absolute_url }}" class="read-more">ادامه و دانلود <b>←</b></a></div></div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="empty-state" id="archiveEmpty"><b>نتیجه‌ای پیدا نشد</b>فیلتر دیگری را امتحان کنید یا همه آهنگ‌ها را ببینید.</div>
+
+    {% if paginator.num_pages > 1 %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">قبلی</a>
+      {% endif %}
+      {% for num in paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a class="page-active" href="#">{{ num|fa_number }}</a>
+        {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+        <a href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ num|fa_number }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">بعدی ←</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <aside class="sidebar">
+    <section class="side-box">
+      <div class="side-heading"><h2>دسته‌بندی موسیقی</h2><span>+</span></div>
+      <div class="category-links">
+        {% for cat in categories %}
+        <a href="{% url 'music:list' %}?category={{ cat.slug }}"><span>{{ cat.icon|default:"♪" }}</span> {{ cat.name }} <b>{{ cat.song_total }}</b></a>
+        {% endfor %}
+      </div>
+    </section>
+  </aside>
+</div>
 </div>
 {% endblock %}
